@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String           @id @default(uuid())
+  email              String           @unique
+  username           String
+  password           String?
+  problems_attempted ProblemAttempt[]
+  problems_created   Problem[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model Problem {
+  id          String           @id @default(uuid())
+  title       String
+  description String
+  creator     User             @relation(fields: [creatorId], references: [id])
+  creatorId   String
+  difficulty  Difficulty       @default(MEDIUM)
+  attempts    ProblemAttempt[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model ProblemAttempt {
+  id          String       @id @default(uuid())
+  problem     Problem      @relation(fields: [problemId], references: [id])
+  problemId   String
+  user        User         @relation(fields: [userId], references: [id])
+  userId      String
+  submissions Submission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Submission {
+  id               Int            @id @default(autoincrement())
+  problemAttempt   ProblemAttempt @relation(fields: [problemAttemptId], references: [id])
+  problemAttemptId String
+  code             String
+  language         Language       @default(PYTHON)
+  status           Status         @default(PENDING)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Language {
+  JAVASCRIPT
+  PYTHON
+  JAVA
+  C
+  CPP
+  GO
+  RUST
+}
+
+enum Status {
+  PENDING
+  ACCEPTED
+  WRONG_ANSWER
+  RUNTIME_ERROR
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  COMPILATION_ERROR
+}
