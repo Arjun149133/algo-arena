@@ -26,12 +26,14 @@ model User {
 
 model Problem {
   id          String           @id @default(uuid())
-  title       String
+  title       String           @unique
   description String
   creator     User             @relation(fields: [creatorId], references: [id])
   creatorId   String
   difficulty  Difficulty       @default(MEDIUM)
   attempts    ProblemAttempt[]
+  boilerPlate BoilerPlate[]
+  testCases   TestCase[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 }
@@ -56,6 +58,26 @@ model Submission {
   status           Status         @default(PENDING)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
+}
+
+model BoilerPlate {
+  id        String   @id @default(uuid())
+  problem   Problem  @relation(fields: [problemId], references: [id])
+  problemId String
+  language  Language @default(PYTHON)
+  code      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TestCase {
+  id        String   @id @default(uuid())
+  problem   Problem  @relation(fields: [problemId], references: [id])
+  problemId String
+  input     String
+  output    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Difficulty {
