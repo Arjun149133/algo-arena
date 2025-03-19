@@ -20,3 +20,24 @@ export const getLanguage = (language: Language) => {
       return "python";
   }
 };
+
+export const getLanguageId = (language: string) => {
+  switch (language) {
+    case "js":
+      return "63";
+    case "py":
+      return "71";
+    case "java":
+      return "62";
+    case "c":
+      return "50";
+    case "cpp":
+      return "54";
+    case "rs":
+      return "73";
+    case "go":
+      return "60";
+    default:
+      return "71";
+  }
+};

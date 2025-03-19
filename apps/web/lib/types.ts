@@ -21,6 +21,13 @@ export type TestCaseType = {
   output: string;
 };
 
+export type SubmissionType = {
+  source_code: string;
+  language_id: string;
+  stdin: string;
+  expected_output: string;
+};
+
 export enum Language {
   JAVASCRIPT = "JAVASCRIPT",
   PYTHON = "PYTHON",
