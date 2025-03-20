@@ -41,3 +41,24 @@ export const getLanguageId = (language: string) => {
       return "71";
   }
 };
+
+export const getLanguageForDb = (language: string) => {
+  switch (language) {
+    case "js":
+      return "JAVASCRIPT";
+    case "py":
+      return "PYTHON";
+    case "java":
+      return "JAVA";
+    case "c":
+      return "C";
+    case "cpp":
+      return "CPP";
+    case "rs":
+      return "RUST";
+    case "go":
+      return "GO";
+    default:
+      return "PYTHON";
+  }
+};

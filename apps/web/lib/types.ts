@@ -26,6 +26,7 @@ export type SubmissionType = {
   language_id: string;
   stdin: string;
   expected_output: string;
+  callback_url?: string;
 };
 
 export enum Language {

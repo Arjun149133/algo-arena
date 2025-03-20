@@ -42,7 +42,7 @@ model ProblemAttempt {
   id          String       @id @default(uuid())
   problem     Problem      @relation(fields: [problemId], references: [id])
   problemId   String
-  user        User         @relation(fields: [userId], references: [id])
+  user        User         @relation(fields: [userId], references: [email])
   userId      String
   submissions Submission[]
   createdAt   DateTime     @default(now())
@@ -50,14 +50,26 @@ model ProblemAttempt {
 }
 
 model Submission {
-  id               Int            @id @default(autoincrement())
-  problemAttempt   ProblemAttempt @relation(fields: [problemAttemptId], references: [id])
+  id               String           @id @default(uuid())
+  problemAttempt   ProblemAttempt   @relation(fields: [problemAttemptId], references: [id])
   problemAttemptId String
   code             String
-  language         Language       @default(PYTHON)
-  status           Status         @default(PENDING)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  language         Language         @default(PYTHON)
+  status           SubmissionStatus @default(PENDING)
+  testCases        TokenTestCase[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model TokenTestCase {
+  id           String     @id @default(uuid())
+  tokenId      String
+  submission   Submission @relation(fields: [submissionId], references: [id])
+  submissionId String
+  status       Status     @default(PENDING)
+  message      String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 model BoilerPlate {
@@ -94,6 +106,12 @@ enum Language {
   CPP
   GO
   RUST
+}
+
+enum SubmissionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 enum Status {
