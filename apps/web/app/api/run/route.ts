@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
       code,
       problemTitle: problem.title,
       language,
+      url_end: `run`,
     });
 
     const submissionTokenArray = await axios.post(

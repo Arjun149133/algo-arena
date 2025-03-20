@@ -63,7 +63,7 @@ model Submission {
 
 model TokenTestCase {
   id           String     @id @default(uuid())
-  tokenId      String
+  tokenId      String     @unique
   submission   Submission @relation(fields: [submissionId], references: [id])
   submissionId String
   status       Status     @default(PENDING)

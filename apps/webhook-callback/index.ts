@@ -28,7 +28,7 @@ app.post("/webhook/run/create", async (req, res) => {
   res.status(200).json({ runId: newRunId });
 });
 
-app.get("/webhook/run/check", async (req, res) => {
+app.post("/webhook/run/check", async (req, res) => {
   const data = req.body;
 
   const runId = data.runId;
@@ -77,7 +77,7 @@ app.put("/webhook/run", async (req, res) => {
   res.status(200).send("OK");
 });
 
-app.get("/webhook/submission/check", async (req, res) => {
+app.post("/webhook/submission/check", async (req, res) => {
   try {
     const data = req.body;
 
@@ -91,14 +91,12 @@ app.get("/webhook/submission/check", async (req, res) => {
 
     let allCompleted = true;
 
-    testCases.some((testCase) => {
+    for (const testCase of testCases) {
       if (testCase.status === "PENDING") {
         allCompleted = false;
-        return true;
+        break;
       }
-
-      return false;
-    });
+    }
 
     if (allCompleted) {
       for (const testCase of testCases) {
@@ -133,6 +131,8 @@ app.put("/webhook/submission", async (req, res) => {
     const data = req.body;
     const token: string = data.token;
 
+    console.log(data);
+
     if (token === undefined) {
       res.status(400).send("Token is required");
       return;
@@ -140,15 +140,14 @@ app.put("/webhook/submission", async (req, res) => {
 
     const status = getStatusFromDescription(data.status.description);
 
-    // Start transaction
     await prisma.$transaction(async (prisma) => {
       await prisma.tokenTestCase.update({
         where: {
-          id: token,
+          tokenId: token,
         },
         data: {
           status: status,
-          message: Buffer.from(data.stderr, "base64").toString("utf8"),
+          // message: Buffer.from(data.stderr, "base64").toString("utf8"),
         },
       });
     });

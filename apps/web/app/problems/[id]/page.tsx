@@ -1,5 +1,4 @@
 import Problem from "@components/Problem";
-import { ProblemType } from "@lib/types";
 import axios from "axios";
 
 const ProblemPage = async ({
@@ -13,6 +12,10 @@ const ProblemPage = async ({
   const problem = await axios.get(
     `${process.env.BACKEND_URL}/api/problems/${id}`
   );
+
+  if (problem.data.error) {
+    return <div>Problem not found</div>;
+  }
 
   return (
     <div>

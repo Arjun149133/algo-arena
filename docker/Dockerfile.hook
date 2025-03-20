@@ -12,6 +12,8 @@ COPY ./apps/webhook-callback ./apps/webhook-callback
 
 RUN bun install
 
+RUN bun run generate:db
+
 EXPOSE 8080
 
 CMD ["bun", "run", "start:webhook"]

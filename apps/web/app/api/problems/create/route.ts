@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       data: {
         title,
         description,
-        creatorId: "e309e134-629d-427b-b854-1cccadb05399",
+        creatorId: "bee0ff14-bd10-4054-b99c-1870a06b149f", //"e309e134-629d-427b-b854-1cccadb05399"
         boilerPlate: {
           createMany: {
             data: boilerPlate.map(

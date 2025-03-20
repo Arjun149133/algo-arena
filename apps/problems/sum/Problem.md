@@ -1,6 +1,6 @@
 ## SUM
 
-Find the sum of the given two elements. complete the give function and return the sum.
+Find the sum of the given two elements. complete the given function and return the sum.
 
 ### Test Case 1
 

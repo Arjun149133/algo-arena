@@ -10,11 +10,11 @@ export async function POST(req: NextRequest) {
     const session = await getSession();
     const { problemId, code, language } = await req.json();
 
-    if (!session?.user?.email) {
-      return NextResponse.json({
-        error: "User not found",
-      });
-    }
+    // if (!session?.user?.email) {
+    //   return NextResponse.json({
+    //     error: "User not found",
+    //   });
+    // }
 
     //language should be js, py, java, c, cpp, rs, go
     const problem = await prisma.problem.findUnique({
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     let existingProblemAttemp = await prisma.problemAttempt.findFirst({
       where: {
         problemId,
-        userId: session?.user?.email,
+        userId: "arjun149133@gmail.com", //session?.user?.email,
       },
     });
 
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       existingProblemAttemp = await prisma.problemAttempt.create({
         data: {
           problemId,
-          userId: session?.user?.email,
+          userId: "arjun149133@gmail.com", //session?.user?.email,
         },
       });
     }
@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
       code,
       problemTitle: problem.title,
       language,
+      url_end: `submission`,
     });
 
     const submissionTokenArray = await axios.post(

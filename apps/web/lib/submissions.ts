@@ -6,10 +6,12 @@ export async function SubmmissionBatch({
   code,
   problemTitle,
   language,
+  url_end,
 }: {
   code: string;
   problemTitle: string;
   language: string;
+  url_end: string;
 }) {
   const filePath = `${process.env.PROBLEMS_PATH}/${problemTitle}/boilerplate-full/function.${language}`;
 
@@ -29,7 +31,7 @@ export async function SubmmissionBatch({
       language_id: getLanguageId(language),
       stdin: inputFile,
       expected_output: outputFiles[index]!,
-      callback_url: `${process.env.WEBHOOK_CALLBACK_URL}/run`,
+      callback_url: `${process.env.WEBHOOK_CALLBACK_URL}/${url_end}`,
     });
   });
 

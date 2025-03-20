@@ -9,7 +9,7 @@ export async function GET(
   const { id } = await params;
   const problem = await prisma.problem.findUnique({
     where: {
-      id,
+      title: id,
     },
     include: {
       boilerPlate: true,
