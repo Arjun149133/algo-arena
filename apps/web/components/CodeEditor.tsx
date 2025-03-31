@@ -1,32 +1,44 @@
-import { getLanguage } from "@lib/helper";
-import { Language } from "@lib/types";
-import { Editor } from "@monaco-editor/react";
-import { useEffect, useState } from "react";
+import React, { useRef } from "react";
+import Editor, { OnMount } from "@monaco-editor/react";
 
-const CodeEditor = ({
-  language,
-  code,
-}: {
-  language: Language;
+interface CodeEditorProps {
   code: string;
+  language: string;
+  onChange: (value: string | undefined) => void;
+  className?: string;
+}
+
+const CodeEditor: React.FC<CodeEditorProps> = ({
+  code,
+  language,
+  onChange,
+  className,
 }) => {
-  const [value, setValue] = useState(code);
-  const [lang, setLang] = useState(getLanguage(language));
-  useEffect(() => {
-    setValue(code);
-    setLang(getLanguage(language));
-  }, [code, language]);
+  const editorRef = useRef<any>(null);
+
+  const handleEditorDidMount: OnMount = (editor) => {
+    editorRef.current = editor;
+    editor.focus();
+  };
+
   return (
-    <div>
+    <div className={`editor-container ${className}`}>
       <Editor
-        height="70vh"
-        defaultValue="select language"
-        language={lang}
+        height="100%"
+        defaultLanguage={language}
+        defaultValue={code}
         theme="vs-dark"
-        value={value}
-        // onChange={(e) => {
-        //   console.log("e", e);
-        // }}
+        onChange={onChange}
+        onMount={handleEditorDidMount}
+        options={{
+          minimap: { enabled: false },
+          fontSize: 14,
+          scrollBeyondLastLine: false,
+          automaticLayout: true,
+          tabSize: 2,
+          wordWrap: "on",
+          padding: { top: 20 },
+        }}
       />
     </div>
   );

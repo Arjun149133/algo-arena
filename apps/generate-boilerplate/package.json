@@ -1,0 +1,14 @@
+{
+  "name": "generate-boilerplate",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "generate-boilerplate": "bun run index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

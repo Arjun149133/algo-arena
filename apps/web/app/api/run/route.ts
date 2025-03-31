@@ -2,10 +2,18 @@ import { prisma } from "@repo/db/client";
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import { SubmmissionBatch } from "@lib/submissions";
+import { getSession } from "next-auth/react";
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getSession();
     const { problemId, code, language } = await req.json();
+
+    if (!session?.user?.email) {
+      return NextResponse.json({
+        error: "User not found",
+      });
+    }
 
     //language should be js, py, java, c, cpp, rs, go
     const problem = await prisma.problem.findUnique({
