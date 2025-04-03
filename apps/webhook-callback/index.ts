@@ -1,9 +1,12 @@
 import express from "express";
 import { randomUUID } from "crypto";
 import { prisma } from "@repo/db/client";
+import cors from "cors";
+import axios from "axios";
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 const runMap: Map<string, string[]> = new Map();
@@ -11,6 +14,12 @@ const tokenMap: Map<string, string | null> = new Map();
 
 type RunData = {
   token: string;
+};
+
+type TestCaseResult = {
+  result: string;
+  status: "PENDING" | "ACCEPTED" | "REJECTED";
+  message?: string;
 };
 
 app.post("/webhook/run/create", async (req, res) => {
@@ -49,6 +58,39 @@ app.post("/webhook/run/check", async (req, res) => {
   }
 
   if (allCompleted) {
+    // const results: TestCaseResult[] = tokenArray.map(async (token) => {
+    //   const res = await axios.get(
+    //     `${process.env.JUDGE0_URL}/submissions/${token}?base64_encoded=false`
+    //   );
+
+    //   const data = res.data;
+
+    //   if (data.error) {
+    //     return {
+    //       result: data.error as string,
+    //       status: "PENDING",
+    //     };
+    //   }
+
+    //   if (data.status.description === "Accepted") {
+    //     return {
+    //       result: data.stdout as string,
+    //       status: "ACCEPTED",
+    //     };
+    //   } else if (data.status.description === "Wrong Answer") {
+    //     return {
+    //       result: data.stdout as string,
+    //       status: "REJECTED",
+    //     };
+    //   } else {
+    //     return {
+    //       result: data.stderr as string,
+    //       status: "REJECTED",
+    //       message: data.message as string,
+    //     };
+    //   }
+    // });
+
     res.status(200).json({
       status: "COMPLETED",
       results: Array.from(tokenArray),

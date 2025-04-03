@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@components/components/ui/button";
 import {
   Tabs,
@@ -6,6 +6,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@components/components/ui/tabs";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface ConsoleOutput {
   status: "success" | "error" | "info";
@@ -13,10 +14,24 @@ interface ConsoleOutput {
 }
 
 interface ProblemConsoleProps {
+  testCases: { input: string; output: string }[];
   className?: string;
+  testCaseResults?: {
+    result: string;
+    status: "PENDING" | "ACCEPTED" | "REJECTED";
+    message?: string;
+  }[];
+  consoleLoader: boolean;
+  setConsoleLoader: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ProblemConsole: React.FC<ProblemConsoleProps> = ({ className }) => {
+const ProblemConsole: React.FC<ProblemConsoleProps> = ({
+  testCases,
+  className,
+  testCaseResults,
+  consoleLoader,
+  setConsoleLoader,
+}) => {
   const [consoleOutput, setConsoleOutput] = useState<ConsoleOutput[]>([
     { status: "info", message: 'Click "Run" to execute your code.' },
   ]);
@@ -25,6 +40,27 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({ className }) => {
   const handleClearConsole = () => {
     setConsoleOutput([{ status: "info", message: "Console cleared." }]);
   };
+
+  useEffect(() => {
+    console.log("testCaseResults", testCaseResults, testCaseResults?.length);
+    console.log("testCases", testCases, testCases.length);
+    if (testCaseResults?.length === testCases.length) {
+      console.log("we are here");
+      setConsoleLoader((prev) => !prev);
+    }
+  }, [testCaseResults]);
+
+  useEffect(() => {
+    console.log(consoleLoader);
+  }, [consoleLoader]);
+
+  if (consoleLoader) {
+    return (
+      <div className=" flex items-center justify-center h-full w-full bg-[#1e1e1e]">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className={`flex flex-col h-full bg-[#1e1e1e] ${className}`}>
@@ -59,32 +95,97 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({ className }) => {
           )}
         </div>
 
-        <TabsContent value="testcase" className="p-4 h-full overflow-auto">
-          <textarea
-            className="w-full h-full bg-[#1e1e1e] text-white resize-none p-2 focus:outline-none border border-[#3e3e3e] rounded"
-            placeholder="Enter your test case here..."
-            defaultValue="[1, 2, 3]"
-          />
-        </TabsContent>
-
-        <TabsContent value="output" className="h-full overflow-auto p-0">
-          <div className="p-4 space-y-2">
-            {consoleOutput.map((output, index) => (
-              <div
-                key={index}
-                className={`font-mono text-sm ${
-                  output.status === "error"
-                    ? "text-red-400"
-                    : output.status === "success"
-                      ? "text-green-400"
-                      : "text-gray-300"
-                }`}
-              >
-                {output.message}
-              </div>
-            ))}
+        {consoleLoader ? (
+          <div className=" flex items-center justify-center h-full w-full bg-[#1e1e1e]">
+            <LoadingSpinner />
           </div>
-        </TabsContent>
+        ) : (
+          <>
+            <TabsContent value="testcase" className="p-4 h-full overflow-auto">
+              <div className="flex flex-col space-y-2">
+                <Tabs defaultValue="testcase-0">
+                  <TabsList className=" bg-transparent ">
+                    {testCases.map((_, index) => (
+                      <TabsTrigger
+                        key={index}
+                        value={`testcase-${index}`}
+                        className=" bg-leetcode-navbar text-white data-[state=active]:bg-leetcode-primary data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-leetcode-primary rounded p-2 mx-2"
+                      >
+                        Test Case {index + 1}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  {testCases.map((testCase, index) => (
+                    <TabsContent
+                      key={index}
+                      value={`testcase-${index}`}
+                      className="p-0"
+                    >
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center justify-between p-2 mb-2">
+                          <div className="flex flex-col space-y-4">
+                            <div className=" flex flex-col">
+                              <h1 className="text-gray-400">Input:</h1>
+                              <div>
+                                {testCase.input
+                                  .split("\\n")
+                                  .map((input, index) => (
+                                    <span
+                                      key={index}
+                                      className=" flex flex-col text-sm"
+                                    >
+                                      {input}
+                                    </span>
+                                  ))}
+                              </div>
+                            </div>
+                            <div className=" flex flex-col">
+                              <h1 className="text-gray-400">
+                                Expected Output:
+                              </h1>
+                              <div>{testCase.output}</div>
+                            </div>
+                            <div>
+                              <h1 className=" text-gray-400">Your Output:</h1>
+                              <div>
+                                {testCaseResults && testCaseResults[index]
+                                  ? testCaseResults[index].result
+                                      .split("\n")
+                                      .map((line, lineIndex) => (
+                                        <div key={lineIndex}>{line}</div>
+                                      ))
+                                  : "No output yet."}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="output" className="h-full overflow-auto p-0">
+              <div className="p-4 space-y-2">
+                {consoleOutput.map((output, index) => (
+                  <div
+                    key={index}
+                    className={`font-mono text-sm ${
+                      output.status === "error"
+                        ? "text-red-400"
+                        : output.status === "success"
+                          ? "text-green-400"
+                          : "text-gray-300"
+                    }`}
+                  >
+                    {output.message}
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+          </>
+        )}
       </Tabs>
     </div>
   );

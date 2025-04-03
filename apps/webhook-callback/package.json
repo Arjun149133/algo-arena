@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@repo/db": "*",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "axios": "^1.8.4",
+    "cors": "^2.8.5",
     "express": "^4.21.2"
   }
 }

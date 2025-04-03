@@ -1,4 +1,5 @@
-Problem Name: "Sum of the Two Numbers"
+Title: sum
+Description: Find the sum of two given two elements
 Function Name: findSum
 Input Structure:
 Input Field: int a

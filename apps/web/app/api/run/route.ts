@@ -9,16 +9,16 @@ export async function POST(req: NextRequest) {
     const session = await getSession();
     const { problemId, code, language } = await req.json();
 
-    if (!session?.user?.email) {
-      return NextResponse.json({
-        error: "User not found",
-      });
-    }
+    // if (!session?.user?.email) {
+    //   return NextResponse.json({
+    //     error: "User not found",
+    //   });
+    // }
 
     //language should be js, py, java, c, cpp, rs, go
     const problem = await prisma.problem.findUnique({
       where: {
-        id: problemId,
+        title: problemId,
       },
     });
 

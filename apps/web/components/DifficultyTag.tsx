@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "./lib/utils";
 
-type DifficultyLevel = "Easy" | "Medium" | "Hard";
+type DifficultyLevel = "EASY" | "MEDIUM" | "HARD";
 
 interface DifficultyTagProps {
   difficulty: DifficultyLevel;
@@ -13,12 +13,12 @@ const DifficultyTag: React.FC<DifficultyTagProps> = ({
   className,
 }) => {
   const getColor = () => {
-    switch (difficulty) {
-      case "Easy":
+    switch (difficulty.toUpperCase()) {
+      case "EASY":
         return "text-leetcode-easy border-leetcode-easy";
-      case "Medium":
+      case "MEDIUM":
         return "text-leetcode-medium border-leetcode-medium";
-      case "Hard":
+      case "HARD":
         return "text-leetcode-hard border-leetcode-hard";
       default:
         return "text-gray-500 border-gray-500";

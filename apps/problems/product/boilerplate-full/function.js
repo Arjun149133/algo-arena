@@ -6,4 +6,4 @@ const input = require("fs")
 const a = parseInt(input.shift());
 const b = parseInt(input.shift());
 
-console.log(findSum(a, b));
+console.log(findProduct(a, b));

@@ -19,6 +19,8 @@ export type TestCaseType = {
   problemId: string;
   input: string;
   output: string;
+  result?: string;
+  status?: "PENDING" | "ACCEPTED" | "REJECTED";
 };
 
 export type SubmissionType = {

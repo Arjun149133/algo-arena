@@ -1,3 +1,3 @@
-function findSum(a, b) {
-  // return sum of the two numbers
+function findSum (a, b) {
+  // return result;
 }

@@ -5,6 +5,9 @@
   "scripts": {
     "generate-boilerplate": "bun run index.ts"
   },
+  "dependencies": {
+    "@repo/db": "*"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
