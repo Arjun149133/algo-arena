@@ -15,7 +15,7 @@ const Navbar = () => {
             href="/"
             className="text-xl font-bold text-white tracking-tight"
           >
-            AlgoSandbox
+            Algo Arena
           </Link>
           <nav className="hidden md:flex gap-1">
             <Button
@@ -40,14 +40,6 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search problems"
-              className="bg-[#323232] text-sm rounded-md pl-9 pr-4 py-2 w-64 focus:outline-none focus:ring-1 focus:ring-leetcode-primary"
-            />
-          </div>
           <Link href="/login">
             <Button
               variant="ghost"

@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-white font-medium mb-4">AlgoSandbox</h3>
+            <h3 className="text-white font-medium mb-4">Algo-arena</h3>
             <p className="text-[#eff2f699] text-sm">
               A platform for learning algorithms and preparing for technical
               interviews.
@@ -104,7 +104,7 @@ const Footer = () => {
 
         <div className="mt-8 pt-6 border-t border-[#3e3e3e] flex flex-col md:flex-row justify-between items-center">
           <p className="text-[#eff2f699] text-sm">
-            © 2023 AlgoSandbox. All rights reserved.
+            © 2023 Algo-arena. All rights reserved.
           </p>
           <div className="flex gap-4 mt-4 md:mt-0">
             <Link

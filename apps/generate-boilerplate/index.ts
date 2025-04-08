@@ -44,7 +44,8 @@ const main = async () => {
       description: problemDescription,
       difficulty:
         (problemDifficulty.toUpperCase() as "EASY") || "MEDIUM" || "HARD",
-      creatorId: "e309e134-629d-427b-b854-1cccadb05399",
+      creatorId: "9f9b8b95-c8d6-45d2-b55d-f23840136ada",
+      // creatorId: "e309e134-629d-427b-b854-1cccadb05399",
     },
   });
 

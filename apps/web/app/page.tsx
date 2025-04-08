@@ -21,7 +21,7 @@ const LandingPage = () => {
             </h1>
             <p className="text-xl text-[#eff2f699] mb-10 max-w-2xl mx-auto">
               Practice coding challenges, prepare for technical interviews, and
-              become a better programmer with AlgoSandbox.
+              become a better programmer with Algo-arena.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/problems">
@@ -46,7 +46,7 @@ const LandingPage = () => {
         <section className="py-16 bg-leetcode-dark">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12">
-              Why AlgoSandbox?
+              Why Algo-arena?
             </h2>
 
             <div className="grid md:grid-cols-3 gap-8">
@@ -107,7 +107,7 @@ const LandingPage = () => {
         <section className="py-20 px-4 bg-gradient-href-r from-[#222222] href-[#1a1a1a]">
           <div className="container mx-auto text-center">
             <h2 className="text-3xl font-bold mb-6">
-              Ready href Ace Your Next Interview?
+              Ready to Ace Your Next Interview?
             </h2>
             <p className="text-xl text-[#eff2f699] mb-10 max-w-xl mx-auto">
               Join thousands of developers who have landed their dream jobs

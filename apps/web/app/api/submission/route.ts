@@ -2,15 +2,34 @@ import { prisma } from "@repo/db/client";
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import { SubmmissionBatch } from "@lib/submissions";
-import { getSession } from "next-auth/react";
 import { getLanguageForDb } from "@lib/helper";
+import { getServerSession } from "next-auth";
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession();
+    const session = await getServerSession();
     const { problemId, code, language } = await req.json();
 
+    if (!problemId || !code || !language) {
+      return NextResponse.json({
+        error: "Missing required fields",
+      });
+    }
+
+    console.log(session, "session");
     if (!session?.user?.email) {
+      return NextResponse.json({
+        error: "User not found",
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: session?.user?.email,
+      },
+    });
+
+    if (!user) {
       return NextResponse.json({
         error: "User not found",
       });
@@ -19,7 +38,7 @@ export async function POST(req: NextRequest) {
     //language should be js, py, java, c, cpp, rs, go
     const problem = await prisma.problem.findUnique({
       where: {
-        id: problemId,
+        title: problemId,
       },
     });
 
@@ -40,7 +59,7 @@ export async function POST(req: NextRequest) {
       existingProblemAttemp = await prisma.problemAttempt.create({
         data: {
           problemId,
-          userId: session?.user?.email,
+          userId: user.email,
         },
       });
     }
@@ -67,20 +86,23 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    submissionTokenArray.data.map(async (value: { token: string }) => {
-      await prisma.submission.update({
-        where: {
-          id: newSubmmision.id,
-        },
-        data: {
-          testCases: {
-            create: {
-              tokenId: value.token,
+    // Map over submissionTokenArray.data and handle async operations in parallel
+    await Promise.all(
+      submissionTokenArray.data.map((value: { token: string }) =>
+        prisma.submission.update({
+          where: {
+            id: newSubmmision.id,
+          },
+          data: {
+            testCases: {
+              create: {
+                tokenId: value.token,
+              },
             },
           },
-        },
-      });
-    });
+        })
+      )
+    );
 
     return NextResponse.json({
       submissionId: newSubmmision.id,

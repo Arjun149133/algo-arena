@@ -68,7 +68,7 @@ const LoginPage = () => {
           <CardHeader>
             <CardTitle className="text-2xl text-center">Sign In</CardTitle>
             <CardDescription className="text-center">
-              Welcome back to AlgoSandbox
+              Welcome back to Algo-arena
             </CardDescription>
           </CardHeader>
 

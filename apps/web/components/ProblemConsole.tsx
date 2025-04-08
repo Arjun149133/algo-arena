@@ -13,14 +13,16 @@ interface ConsoleOutput {
   message: string;
 }
 
+interface TestCaseResult {
+  result: string | null;
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | "TIME LIMIT EXCEEDED";
+  message?: string;
+}
+
 interface ProblemConsoleProps {
   testCases: { input: string; output: string }[];
   className?: string;
-  testCaseResults?: {
-    result: string;
-    status: "PENDING" | "ACCEPTED" | "REJECTED";
-    message?: string;
-  }[];
+  testCaseResults?: TestCaseResult[];
   consoleLoader: boolean;
   setConsoleLoader: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -36,23 +38,41 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({
     { status: "info", message: 'Click "Run" to execute your code.' },
   ]);
   const [activeTab, setActiveTab] = useState("testcase");
+  const [testCasesStatus, setTestCasesStatus] = useState<
+    "PENDING" | "ACCEPTED" | "WRONG ANSWER" | "TIME LIMIT EXCEEDED"
+  >("PENDING");
 
   const handleClearConsole = () => {
     setConsoleOutput([{ status: "info", message: "Console cleared." }]);
   };
 
   useEffect(() => {
+    if (!testCaseResults) return;
     console.log("testCaseResults", testCaseResults, testCaseResults?.length);
     console.log("testCases", testCases, testCases.length);
     if (testCaseResults?.length === testCases.length) {
-      console.log("we are here");
       setConsoleLoader((prev) => !prev);
     }
-  }, [testCaseResults]);
 
-  useEffect(() => {
-    console.log(consoleLoader);
-  }, [consoleLoader]);
+    if (testCaseResults?.length > 0) {
+      setTestCasesStatus("PENDING");
+      for (let i = 0; i < testCaseResults.length; i++) {
+        const res = testCaseResults[i] as TestCaseResult;
+        if (res.status === "REJECTED") {
+          if (res.message?.toLowerCase()?.startsWith("time limit exceeded")) {
+            setTestCasesStatus("TIME LIMIT EXCEEDED");
+          } else {
+            setTestCasesStatus("WRONG ANSWER");
+          }
+          break;
+        }
+      }
+
+      if (testCasesStatus === "PENDING") {
+        setTestCasesStatus("ACCEPTED");
+      }
+    }
+  }, [testCaseResults]);
 
   if (consoleLoader) {
     return (
@@ -63,7 +83,7 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({
   }
 
   return (
-    <div className={`flex flex-col h-full bg-[#1e1e1e] ${className}`}>
+    <div className={`flex flex-col h-full bg-[#1e1e1e] ${className} pb-8`}>
       <Tabs defaultValue="testcase" className="w-full h-full text-white">
         <div className="flex items-center justify-between border-b border-[#3e3e3e] px-4">
           <TabsList className="bg-transparent ">
@@ -101,6 +121,13 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({
           </div>
         ) : (
           <>
+            {testCasesStatus !== "PENDING" && (
+              <div
+                className={`${testCasesStatus.startsWith("ACCEPTED") ? "text-green-600" : "text-red-400"} font-semibold text-md flex pl-6`}
+              >
+                {testCasesStatus}
+              </div>
+            )}
             <TabsContent value="testcase" className="p-4 h-full overflow-auto">
               <div className="flex flex-col space-y-2">
                 <Tabs defaultValue="testcase-0">
@@ -149,11 +176,8 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({
                               <h1 className=" text-gray-400">Your Output:</h1>
                               <div>
                                 {testCaseResults && testCaseResults[index]
-                                  ? testCaseResults[index].result
-                                      .split("\n")
-                                      .map((line, lineIndex) => (
-                                        <div key={lineIndex}>{line}</div>
-                                      ))
+                                  ? (testCaseResults[index] as TestCaseResult)
+                                      .result
                                   : "No output yet."}
                               </div>
                             </div>

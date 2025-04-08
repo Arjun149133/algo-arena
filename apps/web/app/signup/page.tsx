@@ -113,7 +113,7 @@ const SignupPage = () => {
               Create an Account
             </CardTitle>
             <CardDescription className="text-center">
-              Join AlgoSandbox today to start solving coding challenges
+              Join Algo-arena today to start solving coding challenges
             </CardDescription>
           </CardHeader>
 

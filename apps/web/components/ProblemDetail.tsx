@@ -53,6 +53,7 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
     )?.code || "// Write your code here"
   );
   const [runId, setRunId] = useState<string | null>(null);
+  const [submisionId, setSubmisionId] = useState<string | null>(null);
   const [testCases, setTestCases] = useState<TestCaseType[]>(
     problem.testCases ?? []
   );
@@ -215,7 +216,7 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
     };
   }, [runId]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     toast("Submitting your solution...", {
       description: "Please wait while we submit your solution.",
       style: {
@@ -230,23 +231,69 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
       },
     });
 
-    // Simulate a delay
-    setTimeout(() => {
-      toast("Submission successful", {
-        description: "Your solution has been submitted for review.",
-        style: {
-          background: "#1e1e1e",
-          color: "#eff2f699",
-        },
-        action: {
-          label: "View Results",
-          onClick: () => {
-            toast.dismiss();
-          },
-        },
-      });
-    }, 2000);
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/submission`,
+      {
+        problemId: problem.title,
+        code: code,
+        language: getLanguageShort(language),
+      }
+    );
+
+    console.log(res.data);
+    setSubmisionId(res.data.submissionId);
+    toast.dismiss();
   };
+
+  useEffect(() => {
+    const fetchSubmissionId = async () => {
+      if (submisionId) {
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_WEBHOOK_CALLBACK_URL}/submission/check`,
+          {
+            submissionId: submisionId,
+          }
+        );
+
+        if (res.data.error) {
+          toast.dismiss();
+          toast.error(res.data.error, {
+            description: "Please check your code and try again.",
+            style: {
+              background: "#1e1e1e",
+              color: "#eff2f699",
+            },
+          });
+          return res.data.error;
+        }
+
+        console.log(res.data);
+        if (res.data.status === "PENDING") {
+          return "PENDING";
+        } else if (res.data.status === "COMPLETED") {
+          return res.data;
+        }
+      }
+    };
+
+    if (!submisionId) return;
+
+    const interval = setInterval(async () => {
+      const status = await fetchSubmissionId();
+
+      if (status === "PENDING") {
+        console.log("Code is still running...");
+      } else {
+        console.log("Submission completed", status);
+        setSubmisionId(null);
+      }
+    }, 5000);
+
+    return () => {
+      setSubmisionId(null);
+      clearInterval(interval);
+    };
+  }, [submisionId]);
 
   return (
     <div className="flex flex-col h-screen">

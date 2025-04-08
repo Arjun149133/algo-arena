@@ -141,23 +141,35 @@ app.post("/webhook/submission/check", async (req, res) => {
     }
 
     if (allCompleted) {
+      let accepted = true;
       for (const testCase of testCases) {
         if (testCase.status !== "ACCEPTED") {
+          accepted = false;
           await prisma.submission.update({
             where: {
               id: submissionId,
             },
             data: {
-              status: "REJECTED",
+              status: testCase.status,
             },
           });
           break;
         }
       }
 
+      if (accepted) {
+        await prisma.submission.update({
+          where: {
+            id: submissionId,
+          },
+          data: {
+            status: "ACCEPTED",
+          },
+        });
+      }
+
       res.status(200).json({
         status: "COMPLETED",
-        results: testCases,
       });
     } else {
       res.status(200).json({ status: "PENDING" });

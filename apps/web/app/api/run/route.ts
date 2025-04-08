@@ -2,11 +2,11 @@ import { prisma } from "@repo/db/client";
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import { SubmmissionBatch } from "@lib/submissions";
-import { getSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession();
+    const session = await getServerSession();
     const { problemId, code, language } = await req.json();
 
     // if (!session?.user?.email) {
