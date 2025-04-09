@@ -86,7 +86,6 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    // Map over submissionTokenArray.data and handle async operations in parallel
     await Promise.all(
       submissionTokenArray.data.map((value: { token: string }) =>
         prisma.submission.update({

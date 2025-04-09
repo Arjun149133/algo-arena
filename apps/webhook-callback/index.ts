@@ -11,6 +11,15 @@ app.use(express.json());
 
 const runMap: Map<string, string[]> = new Map();
 const tokenMap: Map<string, string | null> = new Map();
+const submissionMap: Map<
+  string,
+  | "ACCEPTED"
+  | "WRONG_ANSWER"
+  | "TIME_LIMIT_EXCEEDED"
+  | "MEMORY_LIMIT_EXCEEDED"
+  | "RUNTIME_ERROR"
+  | "COMPILATION_ERROR"
+> = new Map();
 
 type RunData = {
   token: string;
@@ -38,85 +47,97 @@ app.post("/webhook/run/create", async (req, res) => {
 });
 
 app.post("/webhook/run/check", async (req, res) => {
-  const data = req.body;
+  try {
+    const data = req.body;
 
-  const runId = data.runId;
+    const runId = data.runId;
 
-  const tokenArray = runMap.get(runId);
+    const tokenArray = runMap.get(runId);
 
-  if (!tokenArray) {
-    res.status(404).json({ error: "Run not found" });
-    return;
-  }
-
-  let allCompleted = true;
-  for (const token of tokenArray) {
-    if (tokenMap.get(token) === null) {
-      allCompleted = false;
-      break;
+    if (!tokenArray) {
+      res.status(404).json({ error: "Run not found" });
+      return;
     }
-  }
 
-  if (allCompleted) {
-    // const results: TestCaseResult[] = tokenArray.map(async (token) => {
-    //   const res = await axios.get(
-    //     `${process.env.JUDGE0_URL}/submissions/${token}?base64_encoded=false`
-    //   );
+    let allCompleted = true;
+    for (const token of tokenArray) {
+      if (tokenMap.get(token) === null) {
+        allCompleted = false;
+        break;
+      }
+    }
 
-    //   const data = res.data;
+    if (allCompleted) {
+      // const results: TestCaseResult[] = tokenArray.map(async (token) => {
+      //   const res = await axios.get(
+      //     `${process.env.JUDGE0_URL}/submissions/${token}?base64_encoded=false`
+      //   );
 
-    //   if (data.error) {
-    //     return {
-    //       result: data.error as string,
-    //       status: "PENDING",
-    //     };
-    //   }
+      //   const data = res.data;
 
-    //   if (data.status.description === "Accepted") {
-    //     return {
-    //       result: data.stdout as string,
-    //       status: "ACCEPTED",
-    //     };
-    //   } else if (data.status.description === "Wrong Answer") {
-    //     return {
-    //       result: data.stdout as string,
-    //       status: "REJECTED",
-    //     };
-    //   } else {
-    //     return {
-    //       result: data.stderr as string,
-    //       status: "REJECTED",
-    //       message: data.message as string,
-    //     };
-    //   }
-    // });
+      //   if (data.error) {
+      //     return {
+      //       result: data.error as string,
+      //       status: "PENDING",
+      //     };
+      //   }
 
-    res.status(200).json({
-      status: "COMPLETED",
-      results: Array.from(tokenArray),
-    });
-  } else {
-    res.status(200).json({ status: "PENDING" });
+      //   if (data.status.description === "Accepted") {
+      //     return {
+      //       result: data.stdout as string,
+      //       status: "ACCEPTED",
+      //     };
+      //   } else if (data.status.description === "Wrong Answer") {
+      //     return {
+      //       result: data.stdout as string,
+      //       status: "REJECTED",
+      //     };
+      //   } else {
+      //     return {
+      //       result: data.stderr as string,
+      //       status: "REJECTED",
+      //       message: data.message as string,
+      //     };
+      //   }
+      // });
+
+      res.status(200).json({
+        status: "COMPLETED",
+        results: Array.from(tokenArray),
+      });
+    } else {
+      res.status(200).json({ status: "PENDING" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 app.put("/webhook/run", async (req, res) => {
-  const data = req.body;
+  try {
+    const data = req.body;
 
-  const token = data.token;
+    const token = data.token;
 
-  let result = data.status.description;
+    console.log(data);
 
-  if (data.compile_output) {
-    result =
-      data.status.description +
-      "," +
-      Buffer.from(data.stderr, "base64").toString("utf8");
+    let result = data.status.description;
+
+    if (data.compile_output) {
+      result =
+        data.status.description +
+        "," +
+        Buffer.from(data.compile_output, "base64").toString("utf8");
+    }
+
+    tokenMap.set(token, result);
+
+    res.status(200).send("OK");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-
-  tokenMap.set(token, result);
-
-  res.status(200).send("OK");
 });
 
 app.post("/webhook/submission/check", async (req, res) => {
@@ -124,6 +145,20 @@ app.post("/webhook/submission/check", async (req, res) => {
     const data = req.body;
 
     const submissionId: string = data.submissionId;
+
+    while (submissionMap.size > 0) {
+      const token = Array.from(submissionMap.keys())[0];
+      const status = submissionMap.get(token);
+      await prisma.tokenTestCase.update({
+        where: {
+          tokenId: token,
+        },
+        data: {
+          status: status,
+        },
+      });
+      submissionMap.delete(token);
+    }
 
     const testCases = await prisma.tokenTestCase.findMany({
       where: {
@@ -194,17 +229,7 @@ app.put("/webhook/submission", async (req, res) => {
 
     const status = getStatusFromDescription(data.status.description);
 
-    await prisma.$transaction(async (prisma) => {
-      await prisma.tokenTestCase.update({
-        where: {
-          tokenId: token,
-        },
-        data: {
-          status: status,
-          // message: Buffer.from(data.stderr, "base64").toString("utf8"),
-        },
-      });
-    });
+    submissionMap.set(token, status);
 
     res.status(200).send("OK");
   } catch (error) {
@@ -231,4 +256,5 @@ const getStatusFromDescription = (description: string) => {
   } else if (description.startsWith("Compilation Error")) {
     return "COMPILATION_ERROR";
   }
+  return "RUNTIME_ERROR";
 };

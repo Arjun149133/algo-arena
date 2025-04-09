@@ -13,7 +13,12 @@ import { toast } from "sonner";
 import CodeEditor from "@components/CodeEditor";
 import ProblemConsole from "@components/ProblemConsole";
 import Link from "next/link";
-import { Language, ProblemType, TestCaseType } from "@lib/types";
+import {
+  Language,
+  ProblemType,
+  SubmissionStatus,
+  TestCaseType,
+} from "@lib/types";
 import {
   Select,
   SelectContent,
@@ -24,6 +29,8 @@ import {
   SelectValue,
 } from "./components/ui/select";
 import axios from "axios";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
+import SubmissionsList from "./SubmissionsList";
 
 // return language as js, py, java, c, cpp, rs, go
 const getLanguageShort = (language: Language) => {
@@ -54,9 +61,6 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
   );
   const [runId, setRunId] = useState<string | null>(null);
   const [submisionId, setSubmisionId] = useState<string | null>(null);
-  const [testCases, setTestCases] = useState<TestCaseType[]>(
-    problem.testCases ?? []
-  );
   const [testCaseResults, setTestCaseResults] = useState<
     {
       result: string;
@@ -65,6 +69,9 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
     }[]
   >([]);
   const [consoleLoader, setConsoleLoader] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>(
+    SubmissionStatus.PENDING
+  );
 
   const handleCodeChange = (value: string | undefined) => {
     if (value !== undefined) {
@@ -161,7 +168,7 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
         for (let i = 0; i < status.length; i++) {
           const token = status[i];
           const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_JUDGE0_URL}/submissions/${token}?base64_encoded=false`
+            `${process.env.NEXT_PUBLIC_JUDGE0_URL}/submissions/${token}?base64_encoded=${language === Language.CPP}`
           );
 
           console.log(res.data);
@@ -176,11 +183,17 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
             });
             return;
           }
+          let testResult = res.data.stdout;
+          if (language === Language.CPP) {
+            testResult = Buffer.from(res.data.stdout, "base64").toString(
+              "utf8"
+            );
+          }
           if (res.data.status.description === "Accepted") {
             setTestCaseResults((prev) => [
               ...prev,
               {
-                result: res.data.stdout,
+                result: testResult,
                 status: "ACCEPTED",
               },
             ]);
@@ -188,7 +201,7 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
             setTestCaseResults((prev) => [
               ...prev,
               {
-                result: res.data.stdout,
+                result: testResult,
                 status: "REJECTED",
                 message: res.data.message,
               },
@@ -197,7 +210,11 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
             setTestCaseResults((prev) => [
               ...prev,
               {
-                result: res.data.stderr,
+                result:
+                  res.data.stderr ||
+                  Buffer.from(res.data.compile_output, "base64").toString(
+                    "utf8"
+                  ),
                 status: "REJECTED",
                 message: res.data.message,
               },
@@ -285,6 +302,11 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
         console.log("Code is still running...");
       } else {
         console.log("Submission completed", status);
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/submission/${submisionId}`
+        );
+
+        setSubmissionStatus(res.data.status);
         setSubmisionId(null);
       }
     }, 5000);
@@ -323,39 +345,68 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
           minSize={30}
           className="bg-leetcode-dark"
         >
-          <div className="h-full overflow-auto p-6">
-            <div
-              className="prose prose-invert max-w-none prose-pre:bg-[#1e1e1e] prose-pre:text-sm prose-pre:p-4 prose-pre:rounded-md prose-code:bg-[#1e1e1e] prose-code:p-1 prose-code:rounded prose-code:text-sm mb-4"
-              dangerouslySetInnerHTML={{ __html: problem.description }}
-            />
-            <div>
-              {problem.testCases.map((testCase, index) => (
+          <Tabs defaultValue="description" className=" p-2">
+            <TabsList className=" bg-transparent border-b border-[#3e3e3e] px-2">
+              <TabsTrigger
+                value="description"
+                className="text-white data-[state=active]:text-black"
+              >
+                Description
+              </TabsTrigger>
+              <TabsTrigger
+                value="submissions"
+                className=" text-white data-[state=active]:text-black"
+              >
+                Submissions
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="description">
+              <div className="h-full overflow-auto p-6">
                 <div
-                  key={testCase.id}
-                  className="flex items-center justify-between p-2 mb-2"
-                >
-                  <div className="flex flex-col">
-                    <div className=" flex items-center justify-start">
-                      <h1 className=" ">Test Case {index + 1}:</h1>
+                  className="prose prose-invert max-w-none prose-pre:bg-[#1e1e1e] prose-pre:text-sm prose-pre:p-4 prose-pre:rounded-md prose-code:bg-[#1e1e1e] prose-code:p-1 prose-code:rounded prose-code:text-sm mb-4"
+                  dangerouslySetInnerHTML={{ __html: problem.description }}
+                />
+                <div>
+                  {problem.testCases.map((testCase, index) => (
+                    <div
+                      key={testCase.id}
+                      className="flex items-center justify-between p-2 mb-2"
+                    >
+                      <div className="flex flex-col">
+                        <div className=" flex items-center justify-start">
+                          <h1 className=" ">Test Case {index + 1}:</h1>
+                        </div>
+                        <div className=" flex flex-col w-full items-start justify-center border-l-2 border-[#3e3e3e] pl-4">
+                          <h1 className=" text-gray-400">
+                            Input:{" "}
+                            {testCase.input.split("\\n").map((input, index) => (
+                              <span
+                                key={index}
+                                className=" flex flex-col text-sm"
+                              >
+                                {input}
+                              </span>
+                            ))}
+                          </h1>
+                          <h1 className=" text-gray-400">
+                            Output: {testCase.output}
+                          </h1>
+                        </div>
+                      </div>
                     </div>
-                    <div className=" flex flex-col w-full items-start justify-center border-l-2 border-[#3e3e3e] pl-4">
-                      <h1 className=" text-gray-400">
-                        Input:{" "}
-                        {testCase.input.split("\\n").map((input, index) => (
-                          <span key={index} className=" flex flex-col text-sm">
-                            {input}
-                          </span>
-                        ))}
-                      </h1>
-                      <h1 className=" text-gray-400">
-                        Output: {testCase.output}
-                      </h1>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="submissions">
+              <div>
+                <SubmissionsList
+                  problemId={problem.title}
+                  submissionId={submisionId}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
         </ResizablePanel>
 
         <ResizableHandle className="bg-[#3e3e3e] w-[1px]" />
@@ -407,7 +458,17 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
               <ResizablePanel defaultSize={30} minSize={20}>
                 <div className="h-full flex flex-col">
                   <div className="flex items-center justify-between bg-[#1e1e1e] px-4 py-2 border-b border-[#3e3e3e]">
-                    <h3 className="text-sm font-medium">Console</h3>
+                    <div className=" flex space-x-2 items-center">
+                      <h3 className="text-sm font-medium">Console:</h3>
+                      {submissionStatus !== "PENDING" && (
+                        <h3
+                          className={`${submissionStatus.startsWith("ACCEPTED") ? "text-green-500" : "text-red-500"} font-medium`}
+                        >
+                          <span className=" text-gray-500">Submission - </span>
+                          {submissionStatus}
+                        </h3>
+                      )}
+                    </div>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
