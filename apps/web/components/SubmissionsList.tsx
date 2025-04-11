@@ -40,8 +40,10 @@ const SubmissionsList = ({
         return;
       }
 
-      console.log(res.data);
-      console.log("Submissions", res.data[0].submissions);
+      if (res.data.length === 0) {
+        setLoader(false);
+        return;
+      }
 
       const filteredSubmissions = res.data[0].submissions.filter(
         (submission: Submission) => submission.status !== "PENDING"

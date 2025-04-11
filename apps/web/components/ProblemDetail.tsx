@@ -31,6 +31,8 @@ import {
 import axios from "axios";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import SubmissionsList from "./SubmissionsList";
+import { useSession } from "next-auth/react";
+import LoadingSpinner from "./LoadingSpinner";
 
 // return language as js, py, java, c, cpp, rs, go
 const getLanguageShort = (language: Language) => {
@@ -69,9 +71,11 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
     }[]
   >([]);
   const [consoleLoader, setConsoleLoader] = useState(false);
+  const [submitLoader, setSubmitLoader] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>(
     SubmissionStatus.PENDING
   );
+  const session = useSession();
 
   const handleCodeChange = (value: string | undefined) => {
     if (value !== undefined) {
@@ -117,8 +121,6 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
       return;
     }
 
-    console.log("running");
-
     const runId = res.data.runId;
     setRunId(runId);
     toast.dismiss();
@@ -126,7 +128,6 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
 
   useEffect(() => {
     const fetchRunId = async () => {
-      console.log("Fetching runId...");
       if (runId) {
         const res = await axios.post(
           `${process.env.NEXT_PUBLIC_WEBHOOK_CALLBACK_URL}/run/check`,
@@ -170,8 +171,6 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
           const res = await axios.get(
             `${process.env.NEXT_PUBLIC_JUDGE0_URL}/submissions/${token}?base64_encoded=${language === Language.CPP}`
           );
-
-          console.log(res.data);
 
           if (res.data.error) {
             toast.error(res.data.error, {
@@ -221,11 +220,8 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
             ]);
           }
         }
-
-        console.log(status);
-        console.log(testCaseResults);
       }
-    }, 5000);
+    }, 1000);
 
     return () => {
       setRunId(null);
@@ -234,6 +230,7 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
   }, [runId]);
 
   const handleSubmit = async () => {
+    setSubmitLoader(true);
     toast("Submitting your solution...", {
       description: "Please wait while we submit your solution.",
       style: {
@@ -257,7 +254,6 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
       }
     );
 
-    console.log(res.data);
     setSubmisionId(res.data.submissionId);
     toast.dismiss();
   };
@@ -284,7 +280,6 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
           return res.data.error;
         }
 
-        console.log(res.data);
         if (res.data.status === "PENDING") {
           return "PENDING";
         } else if (res.data.status === "COMPLETED") {
@@ -301,18 +296,29 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
       if (status === "PENDING") {
         console.log("Code is still running...");
       } else {
-        console.log("Submission completed", status);
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/submission/${submisionId}`
         );
 
+        if (res.data.status === "ACCEPTED") {
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/problems/solved`,
+            {
+              submissionId: submisionId,
+              solved: true,
+            }
+          );
+        }
+
         setSubmissionStatus(res.data.status);
         setSubmisionId(null);
+        setSubmitLoader(false);
       }
-    }, 5000);
+    }, 1000);
 
     return () => {
       setSubmisionId(null);
+      setSubmitLoader(false);
       clearInterval(interval);
     };
   }, [submisionId]);
@@ -376,10 +382,10 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
                         <div className=" flex items-center justify-start">
                           <h1 className=" ">Test Case {index + 1}:</h1>
                         </div>
-                        <div className=" flex flex-col w-full items-start justify-center border-l-2 border-[#3e3e3e] pl-4">
+                        <div className=" flex flex-col w-full items-start justify-center border-l-2 border-[#3e3e3e] pl-4 space-y-2">
                           <h1 className=" text-gray-400">
-                            Input:{" "}
-                            {testCase.input.split("\\n").map((input, index) => (
+                            Input:
+                            {testCase.input.split("\n").map((input, index) => (
                               <span
                                 key={index}
                                 className=" flex flex-col text-sm"
@@ -469,19 +475,39 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
                         </h3>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        className="bg-leetcode-primary hover:bg-leetcode-primary/90 text-white"
-                        onClick={handleRun}
-                      >
-                        <Play className="h-4 w-4 mr-1" />
-                        Run
+                    {session.status === "authenticated" ? (
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-leetcode-primary hover:bg-leetcode-primary/90 text-white"
+                          onClick={handleRun}
+                          disabled={consoleLoader}
+                        >
+                          <Play className="h-4 w-4 mr-1" />
+                          Run
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleSubmit}
+                          disabled={submitLoader}
+                        >
+                          {submitLoader ? (
+                            <span className=" flex items-center justify-center">
+                              Submitting...
+                              <LoadingSpinner />
+                            </span>
+                          ) : (
+                            "Submit"
+                          )}
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button>
+                        <Link href="/auth/login" className="text-white">
+                          SignIn to submit
+                        </Link>
                       </Button>
-                      <Button size="sm" onClick={handleSubmit}>
-                        Submit
-                      </Button>
-                    </div>
+                    )}
                   </div>
                   <ProblemConsole
                     testCases={problem.testCases}

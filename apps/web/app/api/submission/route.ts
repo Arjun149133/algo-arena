@@ -16,7 +16,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    console.log(session, "session");
     if (!session?.user?.email) {
       return NextResponse.json({
         error: "User not found",

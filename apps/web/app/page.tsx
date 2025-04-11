@@ -1,11 +1,10 @@
-import React from "react";
 import { ArrowRight, Code, Check } from "lucide-react";
 import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
 import { Button } from "@components/components/ui/button";
 import Link from "next/link";
 
-const LandingPage = () => {
+const LandingPage = async () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -30,7 +29,7 @@ const LandingPage = () => {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link href="/auth/signup">
                 <Button
                   variant="outline"
                   className="px-8 py-6 cursor-pointer bg-leetcode-background ease-in text-white hover:bg-leetcode-primary/90"
@@ -113,7 +112,7 @@ const LandingPage = () => {
               Join thousands of developers who have landed their dream jobs
               through consistent practice.
             </p>
-            <Link href="/signup">
+            <Link href="/auth/signup">
               <Button className="bg-leetcode-primary hover:bg-leetcode-primary/90 text-white px-8 py-6">
                 Create Free Account
               </Button>

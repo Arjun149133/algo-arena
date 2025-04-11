@@ -9,17 +9,24 @@ import {
   CardTitle,
 } from "@components/components/ui/card";
 import { Input } from "@components/components/ui/input";
+import LoadingSpinner from "@components/LoadingSpinner";
 import Navbar from "@components/Navbar";
 import { Label } from "@radix-ui/react-label";
+import { signIn } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
+  const [loader, setLoader] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
+    setLoader(true);
     e.preventDefault();
 
     if (!email || !password) {
@@ -39,22 +46,45 @@ const LoginPage = () => {
       return;
     }
 
-    // In a real app, we would send this data href a backend service
-    toast("Login successful", {
-      description: "Welcome back!",
-      style: {
-        background: "#1e1e1e",
-        color: "#eff2f699",
-      },
-      action: {
-        label: "Continue",
-        onClick: () => {
-          toast.dismiss();
-        },
-      },
+    signIn("credentials", {
+      email: email,
+      password: password,
+      redirect: false,
+    }).then((res) => {
+      if (!res?.ok) {
+        toast("Invalid credentials", {
+          description: "Please check your email and password.",
+          style: {
+            background: "#1e1e1e",
+            color: "#eff2f699",
+          },
+          action: {
+            label: "Try again",
+            onClick: () => {
+              toast.dismiss();
+            },
+          },
+        });
+      } else {
+        router.push("/");
+        toast("Login successful", {
+          description: "Welcome back!",
+          style: {
+            background: "#1e1e1e",
+            color: "#eff2f699",
+          },
+          action: {
+            label: "Continue",
+            onClick: () => {
+              toast.dismiss();
+            },
+          },
+        });
+      }
+
+      setLoader(false);
     });
 
-    // Reset form
     setEmail("");
     setPassword("");
   };
@@ -91,12 +121,9 @@ const LoginPage = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-xs text-leetcode-primary hover:underline"
-                  >
+                  <span className="text-xs text-leetcode-primary hover:underline">
                     Forgot password?
-                  </Link>
+                  </span>
                 </div>
                 <Input
                   id="password"
@@ -113,18 +140,44 @@ const LoginPage = () => {
                 type="submit"
                 className="w-full bg-leetcode-primary hover:bg-leetcode-primary/90"
               >
-                Sign In
+                {loader ? (
+                  <div className=" flex items-center justify-center">
+                    <LoadingSpinner />
+                  </div>
+                ) : (
+                  <>Sign In</>
+                )}
               </Button>
 
               <p className="text-sm text-center">
                 Don't have an account?{" "}
                 <Link
-                  href="/signup"
-                  className="text-leetcode-primary hover:underline"
+                  href="/auth/signup"
+                  className="text-leetcode-primary hover:underline cursor-pointer"
                 >
                   Create one
                 </Link>
               </p>
+              <div className=" flex flex-col justify-center items-center space-y-2">
+                <span>or</span>
+                <Button
+                  onClick={() =>
+                    signIn("google", {
+                      callbackUrl: "/",
+                    })
+                  }
+                  className="cursor-pointer bg-slate-200 hover:bg-slate-300 text-violet-600 font-semibold"
+                >
+                  <Image
+                    src="/google-icon.svg"
+                    alt="icon"
+                    height={48}
+                    width={48}
+                    className=" h-7 w-7"
+                  />
+                  Sign up with Google
+                </Button>
+              </div>
             </CardFooter>
           </form>
         </Card>

@@ -10,6 +10,7 @@ import {
 } from "@components/components/ui/select";
 import DifficultyTag from "./DifficultyTag";
 import Link from "next/link";
+import axios from "axios";
 
 type Problem = {
   id: string;
@@ -26,6 +27,32 @@ const ProblemList = ({ problems }: { problems: Problem[] }) => {
   const [selectedDifficulty, setSelectedDifficulty] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [filteredProblems, setFilteredProblems] = useState<Problem[]>(problems);
+  //a hashmap where key is title and value is solved
+  const [solvedProblems, setSolvedProblems] = useState<{
+    [key: string]: boolean;
+  }>({});
+
+  useEffect(() => {
+    const fetchSolvedProblems = async () => {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/problems/solved`
+      );
+
+      if (res.status !== 200) {
+        console.error("Error fetching solved problems");
+        return;
+      }
+
+      const solvedProblemsMap: { [key: string]: boolean } = {};
+      res.data.forEach((problem: { problemId: string; solved: boolean }) => {
+        solvedProblemsMap[problem.problemId] = problem.solved;
+      });
+
+      setSolvedProblems(solvedProblemsMap);
+    };
+
+    fetchSolvedProblems();
+  }, []);
 
   useEffect(() => {
     const filtered = problems.filter((problem) => {
@@ -43,8 +70,8 @@ const ProblemList = ({ problems }: { problems: Problem[] }) => {
 
       const matchesStatus =
         selectedStatus === "All" ||
-        (selectedStatus === "Solved" && problem.solved) ||
-        (selectedStatus === "Unsolved" && !problem.solved);
+        (selectedStatus === "Solved" && solvedProblems[problem.title]) ||
+        (selectedStatus === "Unsolved" && !solvedProblems[problem.title]);
 
       return matchesSearchTerm && matchesDifficulty && matchesStatus;
     });
@@ -116,7 +143,7 @@ const ProblemList = ({ problems }: { problems: Problem[] }) => {
           <Link href={`/problems/${problem.title}`} key={problem.title}>
             <div className="grid grid-cols-12 text-sm py-4 px-6 hover:bg-leetcode-hover border-b border-[#3e3e3e]">
               <div className="col-span-1">
-                {problem.solved ? (
+                {solvedProblems[problem.title] ? (
                   <div className="h-5 w-5 rounded-full bg-leetcode-primary flex items-center justify-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

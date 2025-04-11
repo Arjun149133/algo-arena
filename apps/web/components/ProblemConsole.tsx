@@ -48,8 +48,6 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({
 
   useEffect(() => {
     if (!testCaseResults) return;
-    console.log("testCaseResults", testCaseResults, testCaseResults?.length);
-    console.log("testCases", testCases, testCases.length);
     if (testCaseResults?.length === testCases.length) {
       setTestCasesStatus("PENDING");
 
@@ -66,7 +64,6 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({
       }
 
       if (testCasesStatus === "PENDING") {
-        console.log("setting");
         setTestCasesStatus("ACCEPTED");
       }
       setConsoleLoader((prev) => !prev);
@@ -154,7 +151,7 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({
                               <h1 className="text-gray-400">Input:</h1>
                               <div>
                                 {testCase.input
-                                  .split("\\n")
+                                  .split("\n")
                                   .map((input, index) => (
                                     <span
                                       key={index}

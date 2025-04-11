@@ -53,7 +53,7 @@ const getInputFiles = async (path: string): Promise<string[]> => {
   return new Promise<string[]>((resolve, reject) => {
     fs.readdir(path, async (err, files) => {
       if (err) {
-        console.log(err);
+        console.error(err);
         reject(err);
       } else {
         await Promise.all(
@@ -72,7 +72,7 @@ const getInputFiles = async (path: string): Promise<string[]> => {
             resolve(data);
           })
           .catch((err) => {
-            console.log(err);
+            console.error(err);
             reject(err);
           });
       }
@@ -84,7 +84,7 @@ const getOutputFiles = async (path: string): Promise<string[]> => {
   return new Promise<string[]>((resolve, reject) => {
     fs.readdir(path, async (err, files) => {
       if (err) {
-        console.log(err);
+        console.error(err);
         reject(err);
       } else {
         await Promise.all(
@@ -103,7 +103,7 @@ const getOutputFiles = async (path: string): Promise<string[]> => {
             resolve(data);
           })
           .catch((err) => {
-            console.log(err);
+            console.error(err);
             reject(err);
           });
       }

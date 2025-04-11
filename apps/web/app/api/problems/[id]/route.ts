@@ -88,7 +88,7 @@ export async function PUT(
       }
     );
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return NextResponse.json(
       {
         error: error,

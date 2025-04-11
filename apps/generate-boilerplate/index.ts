@@ -49,8 +49,6 @@ const main = async () => {
     },
   });
 
-  console.log(file);
-
   const boilerplateJs = getBoilerPlateForJs(file);
   const boilerplateFullJs = getBoilerPlateFullForJs(file);
   const boilerPlatePy = getBoilerPlateForPy(file);
@@ -216,7 +214,7 @@ const getStructureFile = async (path: string): Promise<string> => {
           resolve(data);
         })
         .catch((err) => {
-          console.log(err);
+          console.error(err);
           reject(err);
         });
     });

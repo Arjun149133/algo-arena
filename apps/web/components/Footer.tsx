@@ -1,4 +1,3 @@
-import Link from "next/link";
 import React from "react";
 
 const Footer = () => {
@@ -18,28 +17,19 @@ const Footer = () => {
             <h3 className="text-white font-medium mb-4">Explore</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  href="/problems"
-                  className="text-[#eff2f699] hover:text-white"
-                >
+                <span className="text-[#eff2f699] hover:text-white">
                   Problems
-                </Link>
+                </span>
               </li>
               <li>
-                <Link
-                  href="/contests"
-                  className="text-[#eff2f699] hover:text-white"
-                >
+                <span className="text-[#eff2f699] hover:text-white">
                   Contests
-                </Link>
+                </span>
               </li>
               <li>
-                <Link
-                  href="/discuss"
-                  className="text-[#eff2f699] hover:text-white"
-                >
+                <span className="text-[#eff2f699] hover:text-white">
                   Discuss
-                </Link>
+                </span>
               </li>
             </ul>
           </div>
@@ -48,25 +38,15 @@ const Footer = () => {
             <h3 className="text-white font-medium mb-4">Resources</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  href="/tutorials"
-                  className="text-[#eff2f699] hover:text-white"
-                >
+                <span className="text-[#eff2f699] hover:text-white">
                   Tutorials
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/faq" className="text-[#eff2f699] hover:text-white">
-                  FAQ
-                </Link>
+                <span className="text-[#eff2f699] hover:text-white">FAQ</span>
               </li>
               <li>
-                <Link
-                  href="/blog"
-                  className="text-[#eff2f699] hover:text-white"
-                >
-                  Blog
-                </Link>
+                <span className="text-[#eff2f699] hover:text-white">Blog</span>
               </li>
             </ul>
           </div>
@@ -75,28 +55,19 @@ const Footer = () => {
             <h3 className="text-white font-medium mb-4">Company</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  href="/about"
-                  className="text-[#eff2f699] hover:text-white"
-                >
+                <span className="text-[#eff2f699] hover:text-white">
                   About Us
-                </Link>
+                </span>
               </li>
               <li>
-                <Link
-                  href="/careers"
-                  className="text-[#eff2f699] hover:text-white"
-                >
+                <span className="text-[#eff2f699] hover:text-white">
                   Careers
-                </Link>
+                </span>
               </li>
               <li>
-                <Link
-                  href="/contact"
-                  className="text-[#eff2f699] hover:text-white"
-                >
+                <span className="text-[#eff2f699] hover:text-white">
                   Contact
-                </Link>
+                </span>
               </li>
             </ul>
           </div>
@@ -107,18 +78,12 @@ const Footer = () => {
             © 2023 Algo-arena. All rights reserved.
           </p>
           <div className="flex gap-4 mt-4 md:mt-0">
-            <Link
-              href="/privacy"
-              className="text-[#eff2f699] hover:text-white text-sm"
-            >
+            <span className="text-[#eff2f699] hover:text-white text-sm">
               Privacy Policy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-[#eff2f699] hover:text-white text-sm"
-            >
+            </span>
+            <span className="text-[#eff2f699] hover:text-white text-sm">
               Terms of Service
-            </Link>
+            </span>
           </div>
         </div>
       </div>
