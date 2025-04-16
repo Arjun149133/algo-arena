@@ -8,7 +8,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "generate:db": "cd packages/db && bunx prisma generate",
-    "start:webhook": "cd apps/webhook-callback && bun run index.ts"
+    "start:webhook": "cd apps/webhook-callback && bun run index.ts",
+    "start:web": "cd apps/web && bun run dev"
   },
   "devDependencies": {
     "prettier": "^3.5.3",

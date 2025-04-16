@@ -122,14 +122,7 @@ app.put("/webhook/run", async (req, res) => {
 
     console.log(data);
 
-    let result = data.status.description;
-
-    if (data.compile_output) {
-      result =
-        data.status.description +
-        "," +
-        Buffer.from(data.compile_output, "base64").toString("utf8");
-    }
+    const result = data.status.description;
 
     tokenMap.set(token, result);
 

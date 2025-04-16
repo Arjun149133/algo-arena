@@ -8,13 +8,14 @@ import {
   getBoilerPlateFullForPy,
 } from "./boilerPlategenerator";
 import { prisma } from "@repo/db/client";
+import "dotenv/config";
 
 const main = async () => {
   const args = process.argv.slice(2);
 
   const [problem] = args;
 
-  const path = `/home/arjun/advProjects/algo-arena/apps/problems/${problem}`;
+  const path = `${process.env.PROBLEMS_PATH}/${problem}`;
 
   const file = await getStructureFile(path);
 

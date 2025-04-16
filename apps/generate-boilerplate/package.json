@@ -6,7 +6,9 @@
     "generate-boilerplate": "bun run index.ts"
   },
   "dependencies": {
-    "@repo/db": "*"
+    "@repo/db": "*",
+    "@types/dotenv": "^8.2.3",
+    "dotenv": "^16.5.0"
   },
   "devDependencies": {
     "@types/bun": "latest"
