@@ -61,10 +61,14 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
       (boilerPlate) => boilerPlate.language === Language.PYTHON
     )?.code || "// Write your code here"
   );
-  const [runId, setRunId] = useState<string | null>(null);
+  // const [runId, setRunId] = useState<string | null>(null);
+  const [submissionTokenArray, setSubmissionTokenArray] = useState<
+    { token: string }[]
+  >([]);
   const [submisionId, setSubmisionId] = useState<string | null>(null);
   const [testCaseResults, setTestCaseResults] = useState<
     {
+      // input: string;
       result: string;
       status: "PENDING" | "ACCEPTED" | "REJECTED";
       message?: string;
@@ -75,6 +79,7 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
   const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>(
     SubmissionStatus.PENDING
   );
+  const [tokenSeen, setTokenSeen] = useState([]);
   const session = useSession();
 
   const handleCodeChange = (value: string | undefined) => {
@@ -86,6 +91,7 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
   const handleRun = async () => {
     setConsoleLoader(true);
     setTestCaseResults([]);
+    setSubmissionTokenArray([]);
     toast("Running your code...", {
       description: "Please wait while we execute your code.",
       style: {
@@ -121,18 +127,19 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
       return;
     }
 
-    const runId = res.data.runId;
-    setRunId(runId);
+    const { submissionTokenArray } = res.data;
+    console.log("submissionTokenArray", submissionTokenArray);
+    setSubmissionTokenArray(submissionTokenArray);
     toast.dismiss();
   };
 
   useEffect(() => {
-    const fetchRunId = async () => {
-      if (runId) {
+    const fetchRunStatus = async () => {
+      if (submissionTokenArray.length > 0) {
         const res = await axios.post(
           `${process.env.NEXT_PUBLIC_WEBHOOK_CALLBACK_URL}/run/check`,
           {
-            runId: runId,
+            submissionTokenArray: submissionTokenArray,
           }
         );
 
@@ -148,28 +155,33 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
           return res.data.error;
         }
 
-        if (res.data.status === "PENDING") {
-          return "PENDING";
-        } else if (res.data.status === "COMPLETED") {
-          return res.data.results;
-        }
+        return res.data.status;
       }
     };
 
-    if (!runId) return;
+    if (submissionTokenArray.length === 0) return;
 
     const interval = setInterval(async () => {
-      const status = await fetchRunId();
+      const status = await fetchRunStatus();
+
+      console.log("status", status);
 
       if (status === "PENDING") {
         console.log("Code is still running...");
       } else {
-        setRunId(null);
-
-        for (let i = 0; i < status.length; i++) {
-          const token = status[i];
+        clearInterval(interval);
+        for (let i = 0; i < submissionTokenArray.length; i++) {
+          const token = submissionTokenArray[i]?.token;
           const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_JUDGE0_URL}/submissions/${token}?base64_encoded=${language === Language.CPP}`
+            `${process.env.NEXT_PUBLIC_JUDGE0_URL}/submissions/${token}?base64_encoded=true`,
+            {
+              headers: {
+                "x-rapidapi-key":
+                  "76a6eb60b0mshad6fe6c266b0898p1f2eb7jsn3ef685ccc25a",
+                "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+                "Content-Type": "application/json",
+              },
+            }
           );
 
           if (res.data.error) {
@@ -183,15 +195,39 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
             return;
           }
           let testResult = res.data.stdout;
-          if (language === Language.CPP) {
+          // const input = Buffer.from(res.data.stdin, "base64").toString("utf8");
+          if (res.data.stderr) {
+            testResult = Buffer.from(res.data.stderr, "base64").toString(
+              "utf8"
+            );
+          } else if (res.data.compile_output) {
+            testResult = Buffer.from(
+              res.data.compile_output,
+              "base64"
+            ).toString("utf8");
+          } else if (
+            res.data.stdout === null &&
+            res.data.stderr === null &&
+            res.data.compile_output === null
+          ) {
+            if (res.data.message) {
+              testResult = Buffer.from(res.data.message, "base64").toString(
+                "utf8"
+              );
+            } else {
+              testResult = res.data.status.description;
+            }
+          } else {
             testResult = Buffer.from(res.data.stdout, "base64").toString(
               "utf8"
             );
           }
+
           if (res.data.status.description === "Accepted") {
             setTestCaseResults((prev) => [
               ...prev,
               {
+                // input: input,
                 result: testResult,
                 status: "ACCEPTED",
               },
@@ -200,6 +236,7 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
             setTestCaseResults((prev) => [
               ...prev,
               {
+                // input: input,
                 result: testResult,
                 status: "REJECTED",
                 message: res.data.message,
@@ -209,13 +246,9 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
             setTestCaseResults((prev) => [
               ...prev,
               {
-                result:
-                  res.data.stderr ||
-                  Buffer.from(res.data.compile_output, "base64").toString(
-                    "utf8"
-                  ),
+                // input: input,
+                result: testResult,
                 status: "REJECTED",
-                message: res.data.message,
               },
             ]);
           }
@@ -224,10 +257,10 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
     }, 1000);
 
     return () => {
-      setRunId(null);
+      setSubmissionTokenArray([]);
       clearInterval(interval);
     };
-  }, [runId]);
+  }, [submissionTokenArray]);
 
   const handleSubmit = async () => {
     setSubmitLoader(true);
@@ -296,6 +329,7 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
       if (status === "PENDING") {
         console.log("Code is still running...");
       } else {
+        clearInterval(interval);
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/submission/${submisionId}`
         );
@@ -308,6 +342,14 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
               solved: true,
             }
           );
+
+          toast.success("Submission Accepted", {
+            description: "Your solution has been accepted.",
+            style: {
+              background: "#1e1e1e",
+              color: "#eff2f699",
+            },
+          });
         }
 
         setSubmissionStatus(res.data.status);

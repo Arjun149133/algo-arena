@@ -11,6 +11,7 @@ import {
 import DifficultyTag from "./DifficultyTag";
 import Link from "next/link";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 type Problem = {
   id: string;
@@ -32,7 +33,11 @@ const ProblemList = ({ problems }: { problems: Problem[] }) => {
     [key: string]: boolean;
   }>({});
 
+  const session = useSession();
+
   useEffect(() => {
+    if (!session.data) return;
+
     const fetchSolvedProblems = async () => {
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/problems/solved`
@@ -52,7 +57,7 @@ const ProblemList = ({ problems }: { problems: Problem[] }) => {
     };
 
     fetchSolvedProblems();
-  }, []);
+  }, [session.data]);
 
   useEffect(() => {
     const filtered = problems.filter((problem) => {
@@ -68,10 +73,14 @@ const ProblemList = ({ problems }: { problems: Problem[] }) => {
         selectedDifficulty === "All" ||
         problem.difficulty.toLowerCase() === selectedDifficulty.toLowerCase();
 
-      const matchesStatus =
-        selectedStatus === "All" ||
-        (selectedStatus === "Solved" && solvedProblems[problem.title]) ||
-        (selectedStatus === "Unsolved" && !solvedProblems[problem.title]);
+      let matchesStatus = true;
+
+      if (session.data) {
+        matchesStatus =
+          selectedStatus === "All" ||
+          (selectedStatus === "Solved" && solvedProblems[problem.title]) ||
+          (selectedStatus === "Unsolved" && !solvedProblems[problem.title]);
+      }
 
       return matchesSearchTerm && matchesDifficulty && matchesStatus;
     });
@@ -116,19 +125,21 @@ const ProblemList = ({ problems }: { problems: Problem[] }) => {
             </SelectContent>
           </Select>
 
-          <Select
-            onValueChange={(value) => setSelectedStatus(value)}
-            defaultValue="All"
-          >
-            <SelectTrigger className="w-[130px] bg-[#323232] border-none">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All</SelectItem>
-              <SelectItem value="Solved">Solved</SelectItem>
-              <SelectItem value="Unsolved">Unsolved</SelectItem>
-            </SelectContent>
-          </Select>
+          {session.data?.user && (
+            <Select
+              onValueChange={(value) => setSelectedStatus(value)}
+              defaultValue="All"
+            >
+              <SelectTrigger className="w-[130px] bg-[#323232] border-none">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All</SelectItem>
+                <SelectItem value="Solved">Solved</SelectItem>
+                <SelectItem value="Unsolved">Unsolved</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 
@@ -143,7 +154,7 @@ const ProblemList = ({ problems }: { problems: Problem[] }) => {
           <Link href={`/problems/${problem.title}`} key={problem.title}>
             <div className="grid grid-cols-12 text-sm py-4 px-6 hover:bg-leetcode-hover border-b border-[#3e3e3e]">
               <div className="col-span-1">
-                {solvedProblems[problem.title] ? (
+                {session.data?.user && solvedProblems[problem.title] ? (
                   <div className="h-5 w-5 rounded-full bg-leetcode-primary flex items-center justify-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

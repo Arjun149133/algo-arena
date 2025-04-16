@@ -27,10 +27,10 @@ export async function SubmmissionBatch({
   const submissions: SubmissionType[] = [];
   inputFiles.forEach((inputFile, index) => {
     submissions.push({
-      source_code: finalCode,
+      source_code: Buffer.from(finalCode).toString("base64"),
       language_id: getLanguageId(language),
-      stdin: inputFile,
-      expected_output: outputFiles[index]!,
+      stdin: Buffer.from(inputFile).toString("base64"),
+      expected_output: Buffer.from(outputFiles[index]!).toString("base64"),
       callback_url: `${process.env.WEBHOOK_CALLBACK_URL}/${url_end}`,
     });
   });

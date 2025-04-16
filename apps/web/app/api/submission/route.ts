@@ -78,12 +78,23 @@ export async function POST(req: NextRequest) {
       url_end: `submission`,
     });
 
-    const submissionTokenArray = await axios.post(
-      `${process.env.JUDGE0_URL}/submissions/batch?base64_encoded=false`,
-      {
+    const options = {
+      method: "POST",
+      url: "https://judge0-ce.p.rapidapi.com/submissions/batch",
+      params: {
+        base64_encoded: "true",
+      },
+      headers: {
+        "x-rapidapi-key": "76a6eb60b0mshad6fe6c266b0898p1f2eb7jsn3ef685ccc25a",
+        "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+        "Content-Type": "application/json",
+      },
+      data: {
         submissions: submissions,
-      }
-    );
+      },
+    };
+
+    const submissionTokenArray = await axios.request(options);
 
     await Promise.all(
       submissionTokenArray.data.map((value: { token: string }) =>

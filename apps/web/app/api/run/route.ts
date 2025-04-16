@@ -9,11 +9,11 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession();
     const { problemId, code, language } = await req.json();
 
-    // if (!session?.user?.email) {
-    //   return NextResponse.json({
-    //     error: "User not found",
-    //   });
-    // }
+    if (!session?.user?.email) {
+      return NextResponse.json({
+        error: "User not found",
+      });
+    }
 
     //language should be js, py, java, c, cpp, rs, go
     const problem = await prisma.problem.findUnique({
@@ -35,22 +35,33 @@ export async function POST(req: NextRequest) {
       url_end: `run`,
     });
 
-    const submissionTokenArray = await axios.post(
-      `${process.env.JUDGE0_URL}/submissions/batch?base64_encoded=false`,
-      {
+    const options = {
+      method: "POST",
+      url: "https://judge0-ce.p.rapidapi.com/submissions/batch",
+      params: {
+        base64_encoded: "true",
+      },
+      headers: {
+        "x-rapidapi-key": "76a6eb60b0mshad6fe6c266b0898p1f2eb7jsn3ef685ccc25a",
+        "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+        "Content-Type": "application/json",
+      },
+      data: {
         submissions: submissions,
-      }
-    );
+      },
+    };
 
-    const result = await axios.post(
-      `${process.env.WEBHOOK_CALLBACK_URL}/run/create`,
-      {
-        submissionTokenArray: submissionTokenArray.data,
-      }
-    );
+    const submissionTokenArray = await axios.request(options);
+
+    // const result = await axios.post(
+    //   `${process.env.WEBHOOK_CALLBACK_URL}/run/create`,
+    //   {
+    //     submissionTokenArray: submissionTokenArray.data,
+    //   }
+    // );
 
     return NextResponse.json({
-      runId: result.data.runId,
+      submissionTokenArray: submissionTokenArray.data,
     });
   } catch (error) {
     console.error(error);

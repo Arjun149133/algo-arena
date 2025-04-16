@@ -49,12 +49,18 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({
   useEffect(() => {
     if (!testCaseResults) return;
     if (testCaseResults?.length === testCases.length) {
-      setTestCasesStatus("PENDING");
+      setTestCasesStatus("ACCEPTED");
+
+      console.log("Test case results:", testCaseResults);
 
       for (let i = 0; i < testCaseResults.length; i++) {
         const res = testCaseResults[i] as TestCaseResult;
         if (res.status === "REJECTED") {
-          if (res.message?.toLowerCase()?.startsWith("time limit exceeded")) {
+          console.log("in here", res.result);
+          if (
+            res.result?.toLowerCase().startsWith("time limit") ||
+            res.result?.toLowerCase().startsWith("processing")
+          ) {
             setTestCasesStatus("TIME LIMIT EXCEEDED");
           } else {
             setTestCasesStatus("WRONG ANSWER");
@@ -63,12 +69,17 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({
         }
       }
 
-      if (testCasesStatus === "PENDING") {
-        setTestCasesStatus("ACCEPTED");
-      }
+      // if (testCasesStatus === "PENDING") {
+      //   console.log("in here pending");
+      //   setTestCasesStatus("ACCEPTED");
+      // }
       setConsoleLoader((prev) => !prev);
     }
   }, [testCaseResults]);
+
+  useEffect(() => {
+    console.log(testCasesStatus);
+  }, [testCasesStatus]);
 
   if (consoleLoader) {
     return (
