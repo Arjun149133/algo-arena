@@ -35,6 +35,8 @@ export async function POST(req: NextRequest) {
       url_end: `run`,
     });
 
+    console.log("submissions", submissions);
+
     const options = {
       method: "POST",
       url: `https://${process.env.X_RAPIDAPI_HOST}/submissions/batch`,
@@ -51,7 +53,11 @@ export async function POST(req: NextRequest) {
       },
     };
 
+    console.log(options);
+
     const submissionTokenArray = await axios.request(options);
+
+    console.log(submissionTokenArray.data);
 
     return NextResponse.json({
       submissionTokenArray: submissionTokenArray.data,

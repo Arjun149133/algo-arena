@@ -172,9 +172,8 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
             `${process.env.NEXT_PUBLIC_JUDGE0_URL}/submissions/${token}?base64_encoded=true`,
             {
               headers: {
-                "x-rapidapi-key":
-                  "76a6eb60b0mshad6fe6c266b0898p1f2eb7jsn3ef685ccc25a",
-                "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+                "x-rapidapi-key": `${process.env.NEXT_PUBLIC_X_RAPIDAPI_KEY}`,
+                "x-rapidapi-host": `${process.env.NEXT_PUBLIC_X_RAPIDAPI_HOST}`,
                 "Content-Type": "application/json",
               },
             }
