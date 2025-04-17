@@ -17,10 +17,10 @@ type Problem = {
   id: string;
   title: string;
   difficulty: string;
-  acceptance: string;
-  solved: boolean;
-  premium: boolean;
-  tags: string[];
+  acceptance?: string;
+  solved?: boolean;
+  premium?: boolean;
+  tags?: string[];
 };
 
 const ProblemList = ({ problems }: { problems: Problem[] }) => {

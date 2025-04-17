@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { problemId: string } }
+  { params }: { params: Promise<{ problemId: string }> }
 ) {
   try {
     const session = await getServerSession();

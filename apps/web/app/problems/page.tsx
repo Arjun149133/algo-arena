@@ -1,16 +1,16 @@
 import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
 import ProblemList from "@components/ProblemList";
-import axios from "axios";
+import { prisma } from "@repo/db/client";
 
 const ProblemsPage = async () => {
-  const res = await axios.get(`${process.env.BACKEND_URL}/api/problems`);
+  const problems = await prisma.problem.findMany();
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
-        <ProblemList problems={res.data} />
+        <ProblemList problems={problems} />
       </main>
       <Footer />
     </div>
