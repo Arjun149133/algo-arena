@@ -10,30 +10,31 @@ import path from "path";
 const LandingPage = async () => {
   const session = await getServerSession();
 
-  const currentDir = process.cwd();
-  console.log("Current working directory:", currentDir);
-  const trimmedDir = currentDir.slice(0, -4);
-  const subdirs = fs.readdirSync(trimmedDir).filter((file) => {
-    const filePath = path.join(trimmedDir, file);
-    return fs.statSync(filePath).isDirectory();
-  });
+  // const currentDir = process.cwd();
+  // console.log("Current working directory:", currentDir);
+  // const trimmedDir = currentDir.slice(0, -4);
+  // console.log("Trimmed working directory:", trimmedDir);
+  // const subdirs = fs.readdirSync(trimmedDir).filter((file) => {
+  //   const filePath = path.join(trimmedDir, file);
+  //   return fs.statSync(filePath).isDirectory();
+  // });
 
-  console.log("length of subdirs:", subdirs.length);
+  // console.log("length of subdirs:", subdirs.length);
 
-  subdirs.forEach((subdir) => {
-    const subdirPath = path.join(currentDir, subdir);
-    console.log("Subdirectory:", subdirPath);
-  });
+  // subdirs.forEach((subdir) => {
+  //   const subdirPath = path.join(trimmedDir, subdir);
+  //   console.log("Subdirectory:", subdirPath);
+  // });
 
-  const subdirs2 = fs.readdirSync("/var/task/").filter((file) => {
-    const filePath = path.join("/var/task/", file);
-    return fs.statSync(filePath).isDirectory();
-  });
-  console.log("length of subdirs2:", subdirs2.length);
-  subdirs2.forEach((subdir) => {
-    const subdirPath = path.join("/var/task/", subdir);
-    console.log("Subdirectory2:", subdirPath);
-  });
+  // const subdirs2 = fs.readdirSync("/var/task/").filter((file) => {
+  //   const filePath = path.join("/var/task/", file);
+  //   return fs.statSync(filePath).isDirectory();
+  // });
+  // console.log("length of subdirs2:", subdirs2.length);
+  // subdirs2.forEach((subdir) => {
+  //   const subdirPath = path.join("/var/task/", subdir);
+  //   console.log("Subdirectory2:", subdirPath);
+  // });
 
   return (
     <div className="min-h-screen flex flex-col">
