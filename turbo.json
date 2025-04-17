@@ -5,7 +5,16 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "DATABASE_URL",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "BACKEND_URL",
+        "PROBLEMS_PATH",
+        "WEBHOOK_CALLBACK_URL",
+        "JUDGE0_URL"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -16,15 +25,6 @@
     "dev": {
       "cache": false,
       "persistent": true
-    },
-    "globalEnv": [
-      "DATABASE_URL",
-      "GOOGLE_CLIENT_ID",
-      "GOOGLE_CLIENT_SECRET",
-      "BACKEND_URL",
-      "PROBLEMS_PATH",
-      "WEBHOOK_CALLBACK_URL",
-      "JUDGE0_URL"
-    ]
+    }
   }
 }

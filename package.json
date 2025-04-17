@@ -9,7 +9,8 @@
     "check-types": "turbo run check-types",
     "generate:db": "cd packages/db && bunx prisma generate",
     "start:webhook": "cd apps/webhook-callback && bun run index.ts",
-    "start:web": "cd apps/web && bun run dev"
+    "start:web": "cd apps/web && bun run dev",
+    "postinstall": "cd packages/db && bunx prisma generate"
   },
   "devDependencies": {
     "prettier": "^3.5.3",
