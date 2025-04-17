@@ -1,6 +1,6 @@
+import axios from "axios";
 import { getLanguageId } from "./helper";
 import { SubmissionType } from "./types";
-import fs from "fs";
 
 export async function SubmmissionBatch({
   code,
@@ -13,16 +13,28 @@ export async function SubmmissionBatch({
   language: string;
   url_end: string;
 }) {
-  const filePath = `${process.env.PROBLEMS_PATH}/${problemTitle}/boilerplate-full/function.${language}`;
+  const gitUrl = `${process.env.GITHUB_CONTENT_API}/${problemTitle}/boilerplate-full/function.${language}`;
 
-  const file = await getFullBoilerPlate(filePath);
+  const res = await axios.get(gitUrl);
+
+  if (res.status !== 200) {
+    throw new Error("Error fetching the file");
+  }
+
+  const file = res.data;
 
   const finalCode = file.replace("##USER_CODE_HERE##", code);
 
-  const testsFolderPath = `${process.env.PROBLEMS_PATH}/${problemTitle}/tests`;
+  const testsFolderPath = `${process.env.GITHUB_API}/${problemTitle}/tests`;
 
-  const inputFiles = await getInputFiles(`${testsFolderPath}/inputs`);
-  const outputFiles = await getOutputFiles(`${testsFolderPath}/outputs`);
+  const inputFiles = await getInputFiles(
+    `${testsFolderPath}/inputs`,
+    problemTitle
+  );
+  const outputFiles = await getOutputFiles(
+    `${testsFolderPath}/outputs`,
+    problemTitle
+  );
 
   const submissions: SubmissionType[] = [];
   inputFiles.forEach((inputFile, index) => {
@@ -38,75 +50,54 @@ export async function SubmmissionBatch({
   return submissions;
 }
 
-const getFullBoilerPlate = async (filePath: string) => {
-  return new Promise<string>((resolve, reject) => {
-    fs.readFile(filePath, "utf-8", (err, data) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(data);
-    });
-  });
+const getInputFiles = async (url: string, problemTitle: string) => {
+  const res = await axios.get(url);
+  if (res.status !== 200) {
+    throw new Error("Error fetching the file");
+  }
+
+  const dir = res.data;
+  const noOfTestCases = dir.length;
+
+  const inputFiles: string[] = [];
+
+  for (let i = 0; i < noOfTestCases; i++) {
+    const response = await axios.get(
+      `${process.env.GITHUB_CONTENT_API}/${problemTitle}/tests/inputs/${i}.txt`
+    );
+    if (response.status !== 200) {
+      throw new Error("Error fetching the file");
+    }
+    const file = response.data;
+    inputFiles.push(file);
+  }
+
+  return inputFiles;
 };
 
-const getInputFiles = async (path: string): Promise<string[]> => {
-  return new Promise<string[]>((resolve, reject) => {
-    fs.readdir(path, async (err, files) => {
-      if (err) {
-        console.error(err);
-        reject(err);
-      } else {
-        await Promise.all(
-          files.map((file) => {
-            return new Promise<string>((resolve, reject) => {
-              fs.readFile(`${path}/${file}`, "utf-8", (err, data) => {
-                if (err) {
-                  reject(err);
-                }
-                resolve(data);
-              });
-            });
-          })
-        )
-          .then((data) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            console.error(err);
-            reject(err);
-          });
-      }
-    });
-  });
-};
+const getOutputFiles = async (path: string, problemTitle: string) => {
+  const res = await axios.get(path);
+  if (res.status !== 200) {
+    throw new Error("Error fetching the file");
+  }
 
-const getOutputFiles = async (path: string): Promise<string[]> => {
-  return new Promise<string[]>((resolve, reject) => {
-    fs.readdir(path, async (err, files) => {
-      if (err) {
-        console.error(err);
-        reject(err);
-      } else {
-        await Promise.all(
-          files.map((file) => {
-            return new Promise<string>((resolve, reject) => {
-              fs.readFile(`${path}/${file}`, "utf-8", (err, data) => {
-                if (err) {
-                  reject(err);
-                }
-                resolve(data);
-              });
-            });
-          })
-        )
-          .then((data) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            console.error(err);
-            reject(err);
-          });
-      }
-    });
-  });
+  const dir = res.data;
+  const noOfTestCases = dir.length;
+
+  const outputFiles: string[] = [];
+
+  for (let i = 0; i < noOfTestCases; i++) {
+    const response = await axios.get(
+      `${process.env.GITHUB_CONTENT_API}/${problemTitle}/tests/outputs/${i}.txt`
+    );
+    if (response.status !== 200) {
+      throw new Error("Error fetching the file");
+    }
+    const file = response.data;
+    // convert file to string if its a number
+    const fileString = typeof file === "number" ? file.toString() : file;
+    outputFiles.push(fileString);
+  }
+
+  return outputFiles;
 };

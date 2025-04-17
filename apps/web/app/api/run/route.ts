@@ -53,13 +53,6 @@ export async function POST(req: NextRequest) {
 
     const submissionTokenArray = await axios.request(options);
 
-    // const result = await axios.post(
-    //   `${process.env.WEBHOOK_CALLBACK_URL}/run/create`,
-    //   {
-    //     submissionTokenArray: submissionTokenArray.data,
-    //   }
-    // );
-
     return NextResponse.json({
       submissionTokenArray: submissionTokenArray.data,
     });
