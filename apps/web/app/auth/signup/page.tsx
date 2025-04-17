@@ -30,6 +30,7 @@ const SignupPage = () => {
   });
   const router = useRouter();
   const [loader, setLoader] = useState(false);
+  const [guestLoader, setGuestLoader] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     try {
@@ -152,6 +153,49 @@ const SignupPage = () => {
     }
   };
 
+  const handleGuestLogin = () => {
+    setGuestLoader(true);
+
+    signIn("credentials", {
+      email: "guestuser@gmail.com",
+      password: "password",
+      redirect: false,
+    }).then((res) => {
+      if (!res?.ok) {
+        toast("Invalid credentials", {
+          description: "Please check your email and password.",
+          style: {
+            background: "#1e1e1e",
+            color: "#eff2f699",
+          },
+          action: {
+            label: "Try again",
+            onClick: () => {
+              toast.dismiss();
+            },
+          },
+        });
+      } else {
+        router.push("/");
+        toast("Login successful", {
+          description: "Welcome back!",
+          style: {
+            background: "#1e1e1e",
+            color: "#eff2f699",
+          },
+          action: {
+            label: "Continue",
+            onClick: () => {
+              toast.dismiss();
+            },
+          },
+        });
+      }
+
+      setGuestLoader(false);
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -247,19 +291,13 @@ const SignupPage = () => {
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
                   I agree to the{" "}
-                  <Link
-                    href="/terms"
-                    className="text-leetcode-primary hover:underline"
-                  >
+                  <span className="text-leetcode-primary hover:underline">
                     Terms of Service
-                  </Link>{" "}
+                  </span>{" "}
                   and{" "}
-                  <Link
-                    href="/privacy"
-                    className="text-leetcode-primary hover:underline"
-                  >
+                  <span className="text-leetcode-primary hover:underline">
                     Privacy Policy
-                  </Link>
+                  </span>
                 </label>
               </div>
             </CardContent>
@@ -268,7 +306,7 @@ const SignupPage = () => {
               <Button
                 type="submit"
                 className="w-full bg-leetcode-primary hover:bg-leetcode-primary/90 cursor-pointer"
-                disabled={loader}
+                disabled={loader || guestLoader}
               >
                 {loader ? (
                   <div className=" flex items-center justify-center">
@@ -276,6 +314,20 @@ const SignupPage = () => {
                   </div>
                 ) : (
                   <>Create Account</>
+                )}
+              </Button>
+
+              <Button
+                onClick={handleGuestLogin}
+                className="w-full bg-blue-500 hover:bg-blue-500/90 cursor-pointer"
+                disabled={guestLoader || loader}
+              >
+                {guestLoader ? (
+                  <div className=" flex items-center justify-center">
+                    <LoadingSpinner />
+                  </div>
+                ) : (
+                  <>Guest Login</>
                 )}
               </Button>
 
@@ -300,6 +352,7 @@ const SignupPage = () => {
                 });
               }}
               className="cursor-pointer bg-slate-200 hover:bg-slate-300 text-violet-600 font-semibold"
+              disabled={loader || guestLoader}
             >
               <Image
                 src="/google-icon.svg"

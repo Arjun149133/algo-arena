@@ -1,21 +1,19 @@
 #include <iostream>
-#include <string>
 #include <vector>
+#include <string>
+using namespace std;
 
 ##USER_CODE_HERE##
 
-int main() {
-std::string line;
-std::vector<std::string> input;
-while (std::getline(std::cin, line)) {
-  input.push_back(line);
-}
-int n = std::stoi(input[0]);
-std::vector<int> arr;
-std::string temp;
-std::stringstream ss(input[1]);
-while (ss >> temp) arr.push_back(std::stoi(temp));
+    int
+    main()
+{
+  int n;
+  cin >> n;
+  vector<int> arr(n);
+  for (int i = 0; i < n; ++i)
+    cin >> arr[i];
 
-std::cout << findMaxElement(n, arr) << std::endl;
+  cout << findMaxElement(n, arr);
   return 0;
 }

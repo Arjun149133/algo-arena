@@ -128,7 +128,6 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
     }
 
     const { submissionTokenArray } = res.data;
-    console.log("submissionTokenArray", submissionTokenArray);
     setSubmissionTokenArray(submissionTokenArray);
     toast.dismiss();
   };
@@ -163,9 +162,6 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
 
     const interval = setInterval(async () => {
       const status = await fetchRunStatus();
-
-      console.log("status", status);
-
       if (status === "PENDING") {
         console.log("Code is still running...");
       } else {

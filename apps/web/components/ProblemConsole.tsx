@@ -51,12 +51,9 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({
     if (testCaseResults?.length === testCases.length) {
       setTestCasesStatus("ACCEPTED");
 
-      console.log("Test case results:", testCaseResults);
-
       for (let i = 0; i < testCaseResults.length; i++) {
         const res = testCaseResults[i] as TestCaseResult;
         if (res.status === "REJECTED") {
-          console.log("in here", res.result);
           if (
             res.result?.toLowerCase().startsWith("time limit") ||
             res.result?.toLowerCase().startsWith("processing")
@@ -68,11 +65,6 @@ const ProblemConsole: React.FC<ProblemConsoleProps> = ({
           break;
         }
       }
-
-      // if (testCasesStatus === "PENDING") {
-      //   console.log("in here pending");
-      //   setTestCasesStatus("ACCEPTED");
-      // }
       setConsoleLoader((prev) => !prev);
     }
   }, [testCaseResults]);

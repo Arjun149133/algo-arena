@@ -24,6 +24,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const [loader, setLoader] = useState(false);
+  const [guestLoader, setGuestLoader] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     setLoader(true);
@@ -89,6 +90,49 @@ const LoginPage = () => {
     setPassword("");
   };
 
+  const handleGuestLogin = () => {
+    setGuestLoader(true);
+
+    signIn("credentials", {
+      email: "guestuser@gmail.com",
+      password: "password",
+      redirect: false,
+    }).then((res) => {
+      if (!res?.ok) {
+        toast("Invalid credentials", {
+          description: "Please check your email and password.",
+          style: {
+            background: "#1e1e1e",
+            color: "#eff2f699",
+          },
+          action: {
+            label: "Try again",
+            onClick: () => {
+              toast.dismiss();
+            },
+          },
+        });
+      } else {
+        router.push("/");
+        toast("Login successful", {
+          description: "Welcome back!",
+          style: {
+            background: "#1e1e1e",
+            color: "#eff2f699",
+          },
+          action: {
+            label: "Continue",
+            onClick: () => {
+              toast.dismiss();
+            },
+          },
+        });
+      }
+
+      setGuestLoader(false);
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -139,6 +183,7 @@ const LoginPage = () => {
               <Button
                 type="submit"
                 className="w-full bg-leetcode-primary hover:bg-leetcode-primary/90"
+                disabled={guestLoader || loader}
               >
                 {loader ? (
                   <div className=" flex items-center justify-center">
@@ -146,6 +191,19 @@ const LoginPage = () => {
                   </div>
                 ) : (
                   <>Sign In</>
+                )}
+              </Button>
+              <Button
+                onClick={handleGuestLogin}
+                className="w-full bg-blue-500 hover:bg-blue-500/90 cursor-pointer"
+                disabled={guestLoader || loader}
+              >
+                {guestLoader ? (
+                  <div className=" flex items-center justify-center">
+                    <LoadingSpinner />
+                  </div>
+                ) : (
+                  <>Guest Login</>
                 )}
               </Button>
 
@@ -167,6 +225,7 @@ const LoginPage = () => {
                     })
                   }
                   className="cursor-pointer bg-slate-200 hover:bg-slate-300 text-violet-600 font-semibold"
+                  disabled={guestLoader || loader}
                 >
                   <Image
                     src="/google-icon.svg"

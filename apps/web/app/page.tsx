@@ -3,8 +3,10 @@ import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
 import { Button } from "@components/components/ui/button";
 import Link from "next/link";
+import { getServerSession } from "next-auth";
 
 const LandingPage = async () => {
+  const session = await getServerSession();
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -29,14 +31,16 @@ const LandingPage = async () => {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/auth/signup">
-                <Button
-                  variant="outline"
-                  className="px-8 py-6 cursor-pointer bg-leetcode-background ease-in text-white hover:bg-leetcode-primary/90"
-                >
-                  Sign Up for Free
-                </Button>
-              </Link>
+              {!session?.user && (
+                <Link href="/auth/signup">
+                  <Button
+                    variant="outline"
+                    className="px-8 py-6 cursor-pointer bg-leetcode-background ease-in text-white hover:bg-leetcode-primary/90"
+                  >
+                    Sign Up for Free
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </section>
@@ -112,11 +116,13 @@ const LandingPage = async () => {
               Join thousands of developers who have landed their dream jobs
               through consistent practice.
             </p>
-            <Link href="/auth/signup">
-              <Button className="bg-leetcode-primary hover:bg-leetcode-primary/90 text-white px-8 py-6">
-                Create Free Account
-              </Button>
-            </Link>
+            {!session?.user && (
+              <Link href="/auth/signup">
+                <Button className="bg-leetcode-primary hover:bg-leetcode-primary/90 text-white px-8 py-6">
+                  Create Free Account
+                </Button>
+              </Link>
+            )}
           </div>
         </section>
       </main>
