@@ -16,6 +16,15 @@
     "dev": {
       "cache": false,
       "persistent": true
-    }
+    },
+    "globalEnv": [
+      "DATABASE_URL",
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "BACKEND_URL",
+      "PROBLEMS_PATH",
+      "WEBHOOK_CALLBACK_URL",
+      "JUDGE0_URL"
+    ]
   }
 }
