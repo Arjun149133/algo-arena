@@ -37,13 +37,13 @@ export async function POST(req: NextRequest) {
 
     const options = {
       method: "POST",
-      url: "https://judge0-ce.p.rapidapi.com/submissions/batch",
+      url: `https://${process.env.X_RAPIDAPI_HOST}/submissions/batch`,
       params: {
         base64_encoded: "true",
       },
       headers: {
-        "x-rapidapi-key": "76a6eb60b0mshad6fe6c266b0898p1f2eb7jsn3ef685ccc25a",
-        "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+        "x-rapidapi-key": `${process.env.X_RAPIDAPI_KEY}`,
+        "x-rapidapi-host": `${process.env.X_RAPIDAPI_HOST}`,
         "Content-Type": "application/json",
       },
       data: {
