@@ -154,71 +154,25 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
           return res.data.error;
         }
 
-        return res.data.status;
+        return res.data;
       }
     };
 
     if (submissionTokenArray.length === 0) return;
 
     const interval = setInterval(async () => {
-      const status = await fetchRunStatus();
-      if (status === "PENDING") {
+      const res = await fetchRunStatus();
+      if (res.status === "PENDING") {
         console.log("Code is still running...");
       } else {
         clearInterval(interval);
-        for (let i = 0; i < submissionTokenArray.length; i++) {
-          const token = submissionTokenArray[i]?.token;
-          const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_JUDGE0_URL}/submissions/${token}?base64_encoded=true`,
-            {
-              headers: {
-                "x-rapidapi-key": `${process.env.NEXT_PUBLIC_X_RAPIDAPI_KEY}`,
-                "x-rapidapi-host": `${process.env.NEXT_PUBLIC_X_RAPIDAPI_HOST}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
+        const result = res.result;
+        for (let i = 0; i < result.length; i++) {
+          console.log(i, "result", result[i]);
 
-          if (res.data.error) {
-            toast.error(res.data.error, {
-              description: "Please check your code and try again.",
-              style: {
-                background: "#1e1e1e",
-                color: "#eff2f699",
-              },
-            });
-            return;
-          }
-          let testResult = res.data.stdout;
-          // const input = Buffer.from(res.data.stdin, "base64").toString("utf8");
-          if (res.data.stderr) {
-            testResult = Buffer.from(res.data.stderr, "base64").toString(
-              "utf8"
-            );
-          } else if (res.data.compile_output) {
-            testResult = Buffer.from(
-              res.data.compile_output,
-              "base64"
-            ).toString("utf8");
-          } else if (
-            res.data.stdout === null &&
-            res.data.stderr === null &&
-            res.data.compile_output === null
-          ) {
-            if (res.data.message) {
-              testResult = Buffer.from(res.data.message, "base64").toString(
-                "utf8"
-              );
-            } else {
-              testResult = res.data.status.description;
-            }
-          } else {
-            testResult = Buffer.from(res.data.stdout, "base64").toString(
-              "utf8"
-            );
-          }
+          const testResult = result[i].testResult;
 
-          if (res.data.status.description === "Accepted") {
+          if (result[i].status === "Accepted") {
             setTestCaseResults((prev) => [
               ...prev,
               {
@@ -227,14 +181,14 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
                 status: "ACCEPTED",
               },
             ]);
-          } else if (res.data.status.description === "Wrong Answer") {
+          } else if (result[i].status === "Wrong Answer") {
             setTestCaseResults((prev) => [
               ...prev,
               {
                 // input: input,
                 result: testResult,
                 status: "REJECTED",
-                message: res.data.message,
+                // message: res.data.message,
               },
             ]);
           } else {
