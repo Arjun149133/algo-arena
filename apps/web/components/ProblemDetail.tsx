@@ -168,8 +168,6 @@ const ProblemDetail = ({ problem }: { problem: ProblemType }) => {
         clearInterval(interval);
         const result = res.result;
         for (let i = 0; i < result.length; i++) {
-          console.log(i, "result", result[i]);
-
           const testResult = result[i].testResult;
 
           if (result[i].status === "Accepted") {
